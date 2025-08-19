@@ -1,9 +1,16 @@
-import React from "react";
-import { FaEnvelope, FaLock } from "react-icons/fa";
-import "../components/LoginPage.css";
-import logo from "../Stage.png";
+import React, { useState } from "react";
+import "./Login.css";
+import logo from "../assets/Stage.png";
 
-function LoginPage({ onSwitchToSignUp }) {
+function LoginPage({ onSwitchToSignUp, onSubmit }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSubmit?.({ email, password });
+  }
+
   return (
     <div className="login-container">
       <img src={logo} alt="Stage Logo" className="logo" />
@@ -11,21 +18,24 @@ function LoginPage({ onSwitchToSignUp }) {
 
       <h2>Login</h2>
 
-      <div className="input-box">
-        <input type="email" placeholder="Email" />
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="input-box">
+          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+        </div>
 
-      <div className="input-box">
-        <input type="password" placeholder="Password" />
-      </div>
+        <div className="input-box">
+          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+        </div>
 
-      <span className="forgot-password">Forgot Password?</span>
+        {/* ข้าม reset password ตามที่ตกลง */}
+        {/* <span className="forgot-password">Forgot Password?</span> */}
 
-      <button className="login-btn">Login</button>
+        <button className="login-btn" type="submit">Login</button>
+      </form>
 
       <p className="signup-text">
         Don’t have an account?{" "}
-        <a href="#" onClick={onSwitchToSignUp}>
+        <a href="#" onClick={(e) => { e.preventDefault(); onSwitchToSignUp?.(); }}>
           Sign up
         </a>
       </p>
@@ -34,4 +44,3 @@ function LoginPage({ onSwitchToSignUp }) {
 }
 
 export default LoginPage;
-

@@ -63,7 +63,9 @@ async function errorFromResponse(res) {
     const data = await res.json();
     if (data?.error) msg = data.error;
     else if (data?.message) msg = data.message;
-  } catch {}
+  } catch {
+    // intentionally empty: ignore errors during logout
+  }
   return new Error(msg);
 }
 
@@ -96,7 +98,9 @@ export async function refreshAccessToken() {
 }
 
 export async function logout() {
-  try { await request("/auth/logout", { method: "POST", auth: true }); } catch {}
+  try { await request("/auth/logout", { method: "POST", auth: true }); } catch {
+    // intentionally empty: ignore errors during logout
+  }
   clearTokens();
 }
 
