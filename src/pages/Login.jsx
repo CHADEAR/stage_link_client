@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Login.css";
 import logo from "../assets/Stage.png";
 
-function LoginPage({ onSwitchToSignUp, onSubmit }) {
+function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); // state สำหรับ error
@@ -53,11 +53,13 @@ function LoginPage({ onSwitchToSignUp, onSubmit }) {
           />
         </div>
 
-        {error && (
-          <div className="error-text" style={{ color: "red", marginBottom: 10 }}>
-            {error}
-          </div>
-        )}
+        <span
+          className="forgot-password"
+          style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline", display: "block", marginBottom: "10px" }}
+          onClick={onSwitchToForgotPassword}
+        >
+          Forgot Password?
+        </span>
 
         <button className="login-btn" type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
