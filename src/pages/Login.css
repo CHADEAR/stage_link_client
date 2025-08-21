@@ -124,3 +124,14 @@ body {
   line-height: 1;
 }
 
+/* Error banner */
+.error-banner {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffe6e6;
+  color: #a40000;
+  border: 1px solid #ffb3b3;
+  font-size: 0.95rem;
+}
+.login-btn[disabled] { opacity: 0.7; cursor: not-allowed; }
