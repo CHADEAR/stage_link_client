@@ -13,8 +13,10 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
 
   return (
     <div className="login-container">
-      <img src={logo} alt="Stage Logo" className="logo" />
-      <div className="logo-text">StageLink</div>
+      <div className="logo">
+        <img src={logo} alt="Stage Logo" />
+        <div className="logo-text-login">StageLink</div>
+      </div>
 
       <h2>Login</h2>
 

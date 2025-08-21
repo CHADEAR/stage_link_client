@@ -98,25 +98,29 @@ body {
 
 .logo {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px auto;
-  position: static;
   width: 100%;
+  gap: 0; /* Reduce gap to 0 for minimal space */
 }
 
 .logo img {
-  width: 100px;
-  margin-bottom: 10px;
+  width: 100px !important;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto -8px auto; /* Use negative margin to pull text closer */
 }
 
-.logo-text {
-  margin: 0;
-  font-size: 20px;
-  color: #ad1e1e;
+.logo-text-login {
+  margin: -100px 0 20px 0;
+  padding-top: 0;
+  font-size: 30px;
+  color: #fefefe;
   font-weight: bold;
   letter-spacing: 0px;
   text-align: center;
+  line-height: 1;
 }
 
