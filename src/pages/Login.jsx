@@ -5,10 +5,22 @@ import logo from "../assets/Stage.png";
 function LoginPage({ onSwitchToSignUp, onSubmit }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); // state สำหรับ error
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSubmit?.({ email, password });
+    setError("");
+    setLoading(true);
+
+    try {
+      await onSubmit?.({ email, password });
+    } catch (err) {
+      // ใช้ message/code จาก api.js ที่ normalize มาแล้ว
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -18,24 +30,49 @@ function LoginPage({ onSwitchToSignUp, onSubmit }) {
 
       <h2>Login</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="input-box">
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="username"
+          />
         </div>
 
         <div className="input-box">
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
         </div>
 
-        {/* ข้าม reset password ตามที่ตกลง */}
-        {/* <span className="forgot-password">Forgot Password?</span> */}
+        {error && (
+          <div className="error-text" style={{ color: "red", marginBottom: 10 }}>
+            {error}
+          </div>
+        )}
 
-        <button className="login-btn" type="submit">Login</button>
+        <button className="login-btn" type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
       </form>
 
       <p className="signup-text">
         Don’t have an account?{" "}
-        <a href="#" onClick={(e) => { e.preventDefault(); onSwitchToSignUp?.(); }}>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            onSwitchToSignUp?.();
+          }}
+        >
           Sign up
         </a>
       </p>

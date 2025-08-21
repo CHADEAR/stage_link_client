@@ -85,9 +85,9 @@ export default function App() {
   }
 
   async function handleRegister({ email, password, username }) {
-    // ถ้า API ต้องการ username ให้ส่ง ถ้าไม่จำเป็นก็ข้ามได้
     await apiRegister(email.trim(), password, username);
-    navigate("/", { replace: true });
+    alert("สมัครสำเร็จ กรุณาเข้าสู่ระบบ"); 
+    navigate("/login", { replace: true });
   }
 
   return (
