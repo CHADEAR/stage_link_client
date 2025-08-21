@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 // pages
 import LoginPage from "./pages/Login";
 import SignUpPage from "./pages/Register";
+import ForgotPasswordPage from "./pages/OTP";
 
 // api
 import {
@@ -90,6 +91,8 @@ export default function App() {
     navigate("/", { replace: true });
   }
 
+  const [page, setPage] = useState("login");
+
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -103,7 +106,11 @@ export default function App() {
           path="/login"
           element={
             !getAccessToken()
-              ? <LoginPage onSubmit={handleLogin} onSwitchToSignUp={() => navigate("/register")} />
+              ? <LoginPage
+                  onSubmit={handleLogin}
+                  onSwitchToSignUp={() => navigate("/register")}
+                  onSwitchToForgotPassword={() => navigate("/forgot-password")}
+                />
               : <Navigate to="/" replace />
           }
         />
@@ -113,6 +120,18 @@ export default function App() {
             !getAccessToken()
               ? <SignUpPage onSubmit={handleRegister} onSwitchToLogin={() => navigate("/login")} />
               : <Navigate to="/" replace />
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <ForgotPasswordPage
+              onBackToLogin={() => navigate("/login")}
+              onSubmit={(email) => {
+                // handle forgot password logic here
+                alert(`Reset link sent to ${email}`);
+              }}
+            />
           }
         />
 

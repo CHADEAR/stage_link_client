@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Login.css";
 import logo from "../assets/Stage.png";
 
-function LoginPage({ onSwitchToSignUp, onSubmit }) {
+function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -27,8 +27,13 @@ function LoginPage({ onSwitchToSignUp, onSubmit }) {
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
         </div>
 
-        {/* ข้าม reset password ตามที่ตกลง */}
-        {/* <span className="forgot-password">Forgot Password?</span> */}
+        <span
+          className="forgot-password"
+          style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline", display: "block", marginBottom: "10px" }}
+          onClick={onSwitchToForgotPassword}
+        >
+          Forgot Password?
+        </span>
 
         <button className="login-btn" type="submit">Login</button>
       </form>
