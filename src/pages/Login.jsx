@@ -5,7 +5,7 @@ import logo from "../assets/Stage.png";
 function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // state สำหรับ error
+  const [error, setError] = useState(""); 
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
@@ -16,7 +16,6 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
     try {
       await onSubmit?.({ email, password });
     } catch (err) {
-      // ใช้ message/code จาก api.js ที่ normalize มาแล้ว
       setError(err.message || "Login failed");
     } finally {
       setLoading(false);
@@ -25,15 +24,15 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
 
   return (
     <div className="login-container">
-      <div className="logo">
+      <div className="login-logo">
         <img src={logo} alt="Stage Logo" />
-        <div className="logo-text-login">StageLink</div>
+        <div className="login-logo-text">StageLink</div>
       </div>
 
-      <h2>Login</h2>
+      <h2 className="login-title">Login</h2>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="input-box">
+      <form className="login-form" onSubmit={handleSubmit} noValidate>
+        <div className="login-input-box">
           <input
             type="email"
             placeholder="Email"
@@ -44,7 +43,7 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
           />
         </div>
 
-        <div className="input-box">
+        <div className="login-input-box">
           <input
             type="password"
             placeholder="Password"
@@ -56,8 +55,7 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
         </div>
 
         <span
-          className="forgot-password"
-          style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline", display: "block", marginBottom: "10px" }}
+          className="login-forgot"
           onClick={onSwitchToForgotPassword}
         >
           Forgot Password?
@@ -67,14 +65,10 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
           {loading ? "Logging in..." : "Login"}
         </button>
         
-        {error && (
-          <div className="error-message" style={{ color: "red", marginTop: "10px" }}>
-            {error}
-          </div>
-        )}
+        {error && <div className="login-error">{error}</div>}
       </form>
 
-      <p className="signup-text">
+      <p className="login-switch-text">
         Don’t have an account?{" "}
         <a
           href="#"

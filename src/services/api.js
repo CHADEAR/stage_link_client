@@ -1,9 +1,9 @@
 // src/services/api.js
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// -------------------- Token helpers --------------------
-let accessToken = null; // memory
-const REFRESH_KEY = "refreshToken"; // localStorage
+// ---------- Token helpers ----------
+let accessToken = null;
+const REFRESH_KEY = "refreshToken";
 
 export function setAccessToken(tok) { accessToken = tok || null; }
 export function getAccessToken() { return accessToken; }
@@ -11,85 +11,48 @@ export function setRefreshToken(tok) { if (tok) localStorage.setItem(REFRESH_KEY
 export function getRefreshToken() { return localStorage.getItem(REFRESH_KEY); }
 export function clearTokens() { accessToken = null; localStorage.removeItem(REFRESH_KEY); }
 
-// -------------------- Low-level fetch with auto-refresh --------------------
-async function request(path, { method = "GET", headers = {}, body, auth = false } = {}) {
-  const finalHeaders = { ...(headers || {}) };
-  if (auth && accessToken) finalHeaders["Authorization"] = `Bearer ${accessToken}`;
-  if (body && !finalHeaders["Content-Type"]) finalHeaders["Content-Type"] = "application/json";
+// ---------- Low-level fetch (+ auto refresh) ----------
+async function doFetch(path, options = {}) {
+  const { method = "GET", headers = {}, body, auth = false } = options;
+  const h = { ...headers };
+  if (auth && accessToken) h.Authorization = `Bearer ${accessToken}`;
+  if (body && !h["Content-Type"]) h["Content-Type"] = "application/json";
 
-  const doFetch = async () =>
-    fetch(`${baseURL}${path}`, {
-      method,
-      headers: finalHeaders,
-      body: body ? JSON.stringify(body) : undefined,
-    });
+  const res = await fetch(`${baseURL}${path}`, { method, headers: h, body: body ? JSON.stringify(body) : undefined });
 
-  let res = await doFetch();
-
-  // ถ้า access หมดอายุบน endpoint ที่ต้อง auth -> ลอง refresh 1 ครั้งแล้ว retry
+  // ถ้า access หมดอายุและเป็น endpoint ที่ต้อง auth → ลอง refresh แล้ว retry 1 ครั้ง
   if (res.status === 401 && auth) {
     const newAccess = await refreshAccessToken();
     if (newAccess) {
-      finalHeaders["Authorization"] = `Bearer ${newAccess}`;
-      res = await doFetch();
+      h.Authorization = `Bearer ${newAccess}`;
+      const res2 = await fetch(`${baseURL}${path}`, { method, headers: h, body: body ? JSON.stringify(body) : undefined });
+      if (!res2.ok) throw await parseErr(res2);
+      return res2.json();
     }
   }
 
-  if (!res.ok) throw await errorFromResponse(res);
-  return safeJson(res);
+  if (!res.ok) throw await parseErr(res);
+  // บาง endpoint อาจตอบ {ok:true} หรือไม่มี body → พยายาม parse ถ้าไม่ได้ให้คืน {} แทน
+  try { return await res.json(); } catch { return {}; }
 }
 
-// อ่าน JSON แบบปลอดภัย (กรณีไม่มี body)
-async function safeJson(res) {
-  try { return await res.json(); }
-  catch { return null; }
+async function parseErr(res) {
+  try {
+    const data = await res.json();
+    throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+  } catch {
+    throw new Error(`HTTP ${res.status}`);
+  }
 }
 
-// map error ให้เป็นข้อความสวย ๆ ตาม code/ข้อความ
-function normalizeErrorMessage(raw, code) {
-  if (code === "EMAIL_EXISTS") return "อีเมลนี้ถูกใช้ไปแล้ว";
-  if (code === "USER_NOT_FOUND") return "ไม่พบบัญชีผู้ใช้นี้";
-  if (code === "BAD_PASSWORD")   return "รหัสผ่านไม่ถูกต้อง";
-  if (code === "MISSING_TOKEN")  return "กรุณาเข้าสู่ระบบใหม่";
-  if (code === "INVALID_TOKEN")  return "เข้าสู่ระบบหมดอายุ/ไม่ถูกต้อง";
-  if (code === "INPUT_REQUIRED") return "กรอกข้อมูลให้ครบถ้วน";
-
-  const m = String(raw || "").toLowerCase();
-  if (m.includes("invalid credentials")) return "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
-  if (m.includes("email exists")) return "อีเมลนี้ถูกใช้ไปแล้ว";
-  if (m.includes("email & password required")) return "กรอกอีเมลและรหัสผ่านให้ครบ";
-  return raw || "เกิดข้อผิดพลาด";
-}
-
-async function errorFromResponse(res) {
-  let data = null;
-  try { data = await res.json(); } catch { /* ignore JSON parse errors */ }
-  const rawMsg = data?.error || data?.message || res.statusText;
-  const code = data?.code || null;
-  const nice = normalizeErrorMessage(rawMsg, code);
-
-  const err = new Error(nice);
-  err.status = res.status;
-  err.code = code;
-  err.raw = rawMsg;
-  return err;
-}
-
-// -------------------- Auth API --------------------
+// ---------- Auth ----------
 export async function register(email, password, username) {
-  const data = await request("/auth/register", {
-    method: "POST",
-    body: { email, password, username },
-  });
-  
-  return data.user; 
+  // backend ปัจจุบันไม่คืน token ใน /register
+  return doFetch("/auth/register", { method: "POST", body: { email, password, username } });
 }
 
 export async function login(email, password) {
-  const data = await request("/auth/login", {
-    method: "POST",
-    body: { email, password },
-  });
+  const data = await doFetch("/auth/login", { method: "POST", body: { email, password } });
   setAccessToken(data.token);
   setRefreshToken(data.refreshToken);
   return data.user;
@@ -99,10 +62,7 @@ export async function refreshAccessToken() {
   const refresh = getRefreshToken();
   if (!refresh) return null;
   try {
-    const data = await request("/auth/refresh", {
-      method: "POST",
-      body: { refreshToken: refresh },
-    });
+    const data = await doFetch("/auth/refresh", { method: "POST", body: { refreshToken: refresh } });
     setAccessToken(data.token);
     return data.token;
   } catch {
@@ -112,22 +72,29 @@ export async function refreshAccessToken() {
 }
 
 export async function logout() {
-  try { await request("/auth/logout", { method: "POST", auth: true }); } catch { /* ignore JSON parse errors */}
+  try { await doFetch("/auth/logout", { method: "POST", auth: true }); } catch {
+    // intentionally ignore errors during logout
+  }
   clearTokens();
 }
 
-// Forgot / Reset (OTP)
-export async function forgotPasswordCode(email) {
-  return request("/auth/forgot", { method: "POST", body: { email } });
-}
-export async function resetPasswordWithCode(email, code, password) {
-  return request("/auth/reset-code", { method: "POST", body: { email, code, password } });
+// ---------- Forgot / Verify / Reset ----------
+export function forgotPasswordCode(email) {
+  return doFetch("/auth/forgot", { method: "POST", body: { email } });
 }
 
-// -------------------- Notes API --------------------
-export async function listNotes() {
-  return request("/notes", { method: "GET" });
+export function verifyPasswordCode(email, code) {
+  return doFetch("/auth/verify-code", { method: "POST", body: { email, code } });
 }
-export async function createNote(body) {
-  return request("/notes", { method: "POST", auth: true, body: { body } });
+
+export function resetPasswordWithCode(email, code, password) {
+  return doFetch("/auth/reset-code", { method: "POST", body: { email, code, password } });
+}
+
+// ---------- Notes ----------
+export function listNotes() {
+  return doFetch("/notes", { method: "GET" });
+}
+export function createNote(body) {
+  return doFetch("/notes", { method: "POST", auth: true, body: { body } });
 }

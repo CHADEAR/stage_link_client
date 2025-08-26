@@ -1,6 +1,12 @@
+// src/pages/OTP.jsx
 import React, { useState } from "react";
 import "./OTP.css";
 import logo from "../assets/Stage.png";
+import { 
+  forgotPasswordCode, 
+  resetPasswordWithCode, 
+  verifyPasswordCode, 
+} from "../services/api";
 
 export default function ResetPasswordFlow({ onBackToLogin }) {
   const [step, setStep] = useState("email"); // email | otp | change
@@ -9,141 +15,187 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleOtpChange = (element, index) => {
-    if (isNaN(element.value)) return false;
-    let newOtp = [...otp];
-    newOtp[index] = element.value;
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+
+  const handleOtpChange = (el, index) => {
+    if (isNaN(el.value)) return false;
+    const newOtp = [...otp];
+    newOtp[index] = el.value;
     setOtp(newOtp);
-
-    if (element.nextSibling && element.value !== "") {
-      element.nextSibling.focus();
-    }
+    if (el.nextSibling && el.value !== "") el.nextSibling.focus();
   };
 
-  const handleVerifyEmail = () => {
-    if (email) {
+  async function handleVerifyEmail(e) {
+    e?.preventDefault?.();
+    setErr(""); setMsg(""); setLoading(true);
+    try {
+      const r = await forgotPasswordCode(email.trim());
+      if (r?.code) {
+        setMsg(`DEV: โค้ดคือ ${r.code} (หมดอายุใน ${r.expiresInMin} นาที)`);
+      } else {
+        setMsg("ถ้าอีเมลนี้มีอยู่ ระบบได้ส่ง OTP ไปแล้ว");
+      }
       setStep("otp");
-      alert("OTP sent to " + email); // เพิ่มบรรทัดนี้เพื่อทดสอบ
-    } else {
-      alert("กรุณากรอกอีเมล");
+    } catch (e) {
+      setErr(e.message || "ส่ง OTP ไม่สำเร็จ");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const handleVerifyOtp = () => {
-    if (otp.join("").length === 6) {
+  async function handleVerifyOtp() {
+    setErr(""); 
+    setMsg("");
+
+    const code = otp.join("");
+    if (code.length !== 6) {
+      setErr("กรุณากรอก OTP ให้ครบ 6 หลัก");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await verifyPasswordCode(email.trim(), code);
+      setMsg("OTP ถูกต้อง โปรดตั้งรหัสผ่านใหม่");
       setStep("change");
+    } catch (e) {
+      setErr(e.message || "OTP ไม่ถูกต้อง");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const handleChangePassword = () => {
-    if (password && password === confirmPassword) {
-      alert("Password changed successfully! ");
-      if (onBackToLogin) onBackToLogin(); // กลับไปหน้า login
-    } else {
-      alert("Passwords do not match ❌");
+  async function handleChangePassword(e) {
+    e?.preventDefault?.();
+    setErr(""); setMsg(""); setLoading(true);
+    try {
+      if (!password) throw new Error("กรุณากรอกรหัสผ่านใหม่");
+      if (password !== confirmPassword) throw new Error("รหัสผ่านไม่ตรงกัน");
+      const code = otp.join("");
+      await resetPasswordWithCode(email.trim(), code, password);
+      setMsg("ตั้งรหัสผ่านใหม่สำเร็จ! โปรดไปที่หน้า Login");
+      setPassword(""); setConfirmPassword("");
+      onBackToLogin?.();
+    } catch (e) {
+      setErr(e.message || "รีเซ็ตรหัสผ่านไม่สำเร็จ");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="reset-container">
-      <div className="logo">
+    <div className="otp-container">
+      <div className="otp-logo">
         <img src={logo} alt="StageLink Logo" />
-        <h2>StageLink</h2>
+        <h2 className="otp-logo-text">StageLink</h2>
       </div>
 
       {/* STEP 1 : EMAIL */}
       {step === "email" && (
-        <div className="reset-box">
-          <h3>Reset your password</h3>
-          <p>
-            Forgotten your password? Enter your email address below, <br />
-            and we’ll send an OTP to your email to verify it. <br />
+        <div className="otp-reset-box">
+          <h3 className="otp-title">Reset your password</h3>
+          <p className="otp-desc">
+            Forgotten your password? Enter your email address below,<br />
+            and we’ll send an OTP to your email.<br />
             OTP is valid for 15 minute only.
           </p>
-          <form onSubmit={(e) => { e.preventDefault(); handleVerifyEmail(); }}>
-            <div className="input-group">
-              <span className="icon">📧</span>
+          <form className="otp-form" onSubmit={handleVerifyEmail}>
+            <div className="otp-input-group">
+              <span className="otp-icon">📧</span>
               <input
                 type="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-            <button className="verify-btn" type="submit">
-              Verify email OTP
+            <button className="otp-verify-btn" type="submit" disabled={loading}>
+              {loading ? "Sending..." : "Verify email OTP"}
             </button>
           </form>
+          {msg && <p className="otp-note otp-ok">{msg}</p>}
+          {err && <p className="otp-note otp-error">{err}</p>}
         </div>
       )}
 
       {/* STEP 2 : OTP */}
       {step === "otp" && (
-        <div className="reset-box">
-          <h3>Reset your password</h3>
-          <p>
-            A 6 digit email OTP was sent to <b>{email}</b>. <br />
+        <div className="otp-reset-box">
+          <h3 className="otp-title">Reset your password</h3>
+          <p className="otp-desc">
+            A 6 digit OTP was sent to <b>{email}</b>.<br />
             Enter that code here to proceed
           </p>
 
           <div className="otp-inputs">
-            {otp.map((data, index) => {
-              return (
-                <input
-                  key={index}
-                  type="text"
-                  maxLength="1"
-                  value={data}
-                  onChange={(e) => handleOtpChange(e.target, index)}
-                  onFocus={(e) => e.target.select()}
-                />
-              );
-            })}
+            {otp.map((v, idx) => (
+              <input
+                key={idx}
+                type="text"
+                maxLength="1"
+                value={v}
+                onChange={(e) => handleOtpChange(e.target, idx)}
+                onFocus={(e) => e.target.select()}
+              />
+            ))}
           </div>
 
-          <div className="btn-group">
-            <button className="back-btn" onClick={() => setStep("email")}>
+          <div className="otp-btn-group">
+            <button className="otp-back-btn" onClick={() => setStep("email")} disabled={loading}>
               Back
             </button>
-            <button className="verify-btn" onClick={handleVerifyOtp}>
+            <button className="otp-verify-btn" onClick={handleVerifyOtp} disabled={loading}>
               Verify email OTP
             </button>
           </div>
+
+          <div style={{ marginTop: 10 }}>
+            <button className="otp-link-btn" onClick={handleVerifyEmail} disabled={loading}>
+              Resend OTP
+            </button>
+          </div>
+          {msg && <p className="otp-note otp-ok">{msg}</p>}
+          {err && <p className="otp-note otp-error">{err}</p>}
         </div>
       )}
 
       {/* STEP 3 : CHANGE PASSWORD */}
       {step === "change" && (
-        <div className="reset-box">
-          <div className="icon-lock">🔒</div>
-          <h3>Change Password</h3>
+        <div className="otp-change-box">
+          <h3 className="otp-change-title">Change Password</h3>
 
-          <div className="input-field">
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <form className="otp-change-form" onSubmit={handleChangePassword}>
+            <div className="otp-change-field">
+              <label className="otp-change-label">Password</label>
+              <input
+                className="otp-change-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="input-field">
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
+            <div className="otp-change-field">
+              <label className="otp-change-label">Confirm Password</label>
+              <input
+                className="otp-change-input"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="btn-group">
-            <button className="back-btn" onClick={() => setStep("otp")}>
-              Back
+            <button className="otp-change-btn" type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Change Password"}
             </button>
-            <button className="confirm-btn" onClick={handleChangePassword}>
-              Change Password
-            </button>
-          </div>
+          </form>
+          {msg && <p className="otp-note otp-ok">{msg}</p>}
+          {err && <p className="otp-note otp-error">{err}</p>}
         </div>
       )}
     </div>

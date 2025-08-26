@@ -1,11 +1,13 @@
-body {
+html, body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  height: 100%;
+  overflow: hidden;
+  font-family: "Inter", system-ui, sans-serif;
   background-color: #111;
   color: #fff;
 }
 
-.reset-container {
+.otp-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,22 +15,11 @@ body {
   min-height: 100vh;
 }
 
-.logo {
-  text-align: center;
-  margin-bottom: 20px;
-}
+.otp-logo { text-align: center; margin-bottom: 20px; }
+.otp-logo img { width: 60px; margin-bottom: 5px; }
+.otp-logo-text { margin: 0; font-size: 16px; }
 
-.logo img {
-  width: 60px;
-  margin-bottom: 5px;
-}
-
-.logo h2 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.reset-box {
+.otp-reset-box {
   background: #d9d9d9;
   color: #111;
   padding: 30px 40px;
@@ -37,19 +28,12 @@ body {
   max-width: 400px;
 }
 
-.reset-box h3 {
-  margin: 10px 0;
-  font-size: 22px;
-  font-weight: bold;
-}
+.otp-title { margin: 10px 0; font-size: 22px; font-weight: bold; }
+.otp-desc { font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
 
-.reset-box p {
-  font-size: 14px;
-  margin-bottom: 20px;
-  line-height: 1.4;
-}
+.otp-form { margin-top: 10px; }
 
-.input-group {
+.otp-input-group {
   display: flex;
   align-items: center;
   background: white;
@@ -57,12 +41,8 @@ body {
   padding: 10px;
   margin-bottom: 20px;
 }
-
-.input-group .icon {
-  margin-right: 8px;
-}
-
-.input-group input {
+.otp-icon { margin-right: 8px; }
+.otp-input-group input {
   border: none;
   outline: none;
   flex: 1;
@@ -75,7 +55,6 @@ body {
   gap: 10px;
   margin-bottom: 20px;
 }
-
 .otp-inputs input {
   width: 45px;
   height: 50px;
@@ -86,34 +65,15 @@ body {
   outline: none;
 }
 
-.input-field {
-  margin-bottom: 15px;
-}
-
-.input-field input {
-  width: 100%;
-  padding: 12px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  background: #555;
-  color: #fff;
-}
-
-.input-field input::placeholder {
-  color: #ccc;
-}
-
-.btn-group {
+.otp-btn-group {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
 
-.verify-btn,
-.confirm-btn,
-.back-btn {
+.otp-verify-btn,
+.otp-confirm-btn,
+.otp-back-btn {
   flex: 1;
   border: none;
   padding: 12px 20px;
@@ -123,28 +83,67 @@ body {
   font-weight: bold;
   transition: 0.3s;
 }
+.otp-verify-btn,
+.otp-confirm-btn { background: #003366; color: white; }
+.otp-verify-btn:hover,
+.otp-confirm-btn:hover { background: #0055aa; }
+.otp-back-btn { background: #aaa; color: #111; }
+.otp-back-btn:hover { background: #888; }
 
-.verify-btn,
-.confirm-btn {
-  background: #003366;
-  color: white;
+.otp-link-btn {
+  background: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-.verify-btn:hover,
-.confirm-btn:hover {
-  background: #0055aa;
-}
+/* notes */
+.otp-note { font-size: 13px; margin-top: 8px; }
+.otp-ok { color: green; }
+.otp-error { color: red; }
 
-.back-btn {
-  background: #aaa;
-  color: #111;
+/* STEP 3 */
+.otp-change-box {
+  width: min(92vw, 520px);
+  margin: 0 auto;
+  color: #fff;
+  text-align: center;
 }
-
-.back-btn:hover {
-  background: #888;
+.otp-change-title { font-size: 20px; font-weight: 800; margin: 4px 0 22px; color: #eaeaea; }
+.otp-change-form { display: grid; gap: 16px; }
+.otp-change-field { display: grid; gap: 8px; text-align: left; }
+.otp-change-label { font-size: 12px; color: #bdbdbd; }
+.otp-change-input {
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  background: #3b3b3b;
+  border: 1px solid #3b3b3b;
+  outline: none;
+  padding: 0 16px;
+  font-size: 15px;
+  color: #f1f1f1;
 }
+.otp-change-input::placeholder { color: #9a9a9a; }
 
-.icon-lock {
-  font-size: 40px;
-  margin-bottom: 10px;
+.otp-change-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  background: #0b2a57;
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+}
+.otp-change-btn:hover { background: #0d3a7a; }
+.otp-change-btn:active { transform: translateY(1px); }
+
+@media (min-width: 1280px) {
+  .otp-change-title { font-size: 21px; margin-bottom: 24px; }
+  .otp-change-input { height: 54px; font-size: 15.5px; }
+  .otp-change-btn { height: 50px; }
 }

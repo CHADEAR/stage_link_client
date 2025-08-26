@@ -30,11 +30,11 @@ function SignUpPage({ onSwitchToLogin, onSubmit }) {
 
   return (
     <div className="signup-container">
-      <img src={logo} alt="Stage Logo" className="logo" />
-      <div className="logo-text-register">StageLink</div>
-      <h2>Sign Up</h2>
+      <img src={logo} alt="Stage Logo" className="signup-logo" />
+      <div className="signup-logo-text">StageLink</div>
+      <h2 className="signup-title">Sign Up</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form className="signup-form" onSubmit={handleSubmit}>
         <div className="signup-input-box">
           <input
             type="text"
@@ -63,16 +63,8 @@ function SignUpPage({ onSwitchToLogin, onSubmit }) {
           />
         </div>
 
-        {error && (
-          <div className="error-text" style={{ color: "red", marginBottom: 10 }}>
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="success-text" style={{ color: "green", marginBottom: 10 }}>
-            {success}
-          </div>
-        )}
+        {error && <div className="signup-error">{error}</div>}
+        {success && <div className="signup-success">{success}</div>}
 
         <button className="signup-btn" type="submit" disabled={loading}>
           {loading ? "Signing up..." : "Sign Up"}
