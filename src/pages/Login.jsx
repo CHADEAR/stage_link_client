@@ -66,6 +66,12 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
         <button className="login-btn" type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
+        
+        {error && (
+          <div className="error-message" style={{ color: "red", marginTop: "10px" }}>
+            {error}
+          </div>
+        )}
       </form>
 
       <p className="signup-text">

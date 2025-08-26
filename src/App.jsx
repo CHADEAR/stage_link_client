@@ -91,7 +91,7 @@ export default function App() {
     navigate("/login", { replace: true });
   }
 
-  const [page, setPage] = useState("login");
+  // const [page, setPage] = useState("login");
 
   return (
     <Routes>
