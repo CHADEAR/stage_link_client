@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/Login";
 import SignUpPage from "./pages/Register";
 import ForgotPasswordPage from "./pages/OTP";
+import Test from "./pages/Test"; 
 
 // api
 import {
@@ -99,6 +100,7 @@ export default function App() {
         {/* เส้นทางที่ล็อกอินแล้วเท่านั้น */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/test" element={<Test />} />
         </Route>
 
         {/* public routes */}

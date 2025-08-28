@@ -13,11 +13,12 @@ html, body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  margin-top: -10%;
 }
 
 .otp-logo { text-align: center; margin-bottom: 20px; }
-.otp-logo img { width: 60px; margin-bottom: 5px; }
-.otp-logo-text { margin: 0; font-size: 16px; }
+.otp-logo img { width: 12rem; margin-bottom: 5px; }
+.otp-logo-text { margin: 0; font-size: 16px; margin-top: -30%; }
 
 .otp-reset-box {
   background: #d9d9d9;
@@ -26,10 +27,12 @@ html, body {
   border-radius: 10px;
   text-align: center;
   max-width: 400px;
+  width: 90%;
+  margin-top: 3%
 }
 
 .otp-title { margin: 10px 0; font-size: 22px; font-weight: bold; }
-.otp-desc { font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
+.otp-desc { font-size: 10px; margin-bottom: 20px;  text-align: left; }
 
 .otp-form { margin-top: 10px; }
 

@@ -19,18 +19,26 @@ html, body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  margin-top: -100px;
+  margin-top: -80px;
   text-align: center;
 }
 
+.login-logo{
+  display: flex;
+  flex-direction: column;
+}
+
 .login-logo img {
-  width: 10rem;
+  width: 12rem;
+  margin-bottom: 20%;
 }
 
 .login-logo-text {
   font-size: 20px;
   font-weight: 600;
-  margin-top: -55px;
+  margin-bottom: 30px;
+  margin-top: -43%;
+  
 }
 
 .login-title {
@@ -132,11 +140,12 @@ html, body {
 /* responsive */
 @media (max-width: 480px) {
   .login-logo img {
-    width: 60px;
+    width: 10rem;
   }
 
   .login-logo-text {
     font-size: 18px;
+    margin-top: -43%;
   }
 
   .login-title {

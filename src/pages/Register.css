@@ -17,10 +17,13 @@ html, body {
   padding: 20px;
   text-align: center;
   box-sizing: border-box;
+  margin-top: -80px;
+
+
 }
 
 .signup-logo {
-  width: 10rem;
+  width: 12rem;
   margin-bottom: 10px;
 }
 
@@ -28,6 +31,7 @@ html, body {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
+   margin-top: -5%;
 }
 
 .signup-title {
@@ -116,11 +120,12 @@ html, body {
 /* ---------- Responsive ---------- */
 @media (max-width: 480px) {
   .signup-logo {
-    width: 60px;
+    width: 10rem;
   }
 
   .signup-logo-text {
     font-size: 18px;
+    margin-top: -15%;
   }
 
   .signup-title {
