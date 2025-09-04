@@ -26,7 +26,7 @@ function LoginPage({ onSwitchToSignUp, onSubmit, onSwitchToForgotPassword }) {
     <div className="login-container">
       <div className="login-logo">
         <img src={logo} alt="Stage Logo" />
-        <div className="login-logo-text">StageLink</div>
+        <p className="login-logo-text">StageLink</p>
       </div>
 
       <h2 className="login-title">Login</h2>
