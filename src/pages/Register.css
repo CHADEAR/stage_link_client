@@ -13,9 +13,17 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;            /* ลบ margin-top ที่เป็น -80px */
+  min-height: 60vh;            /* ลบ margin-top ที่เป็น -80px */
   text-align: center;
   background: #fff;
+}
+
+.signup-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px; /* ระยะห่างจาก Sign Up */
 }
 
 .signup-logo {
@@ -27,17 +35,16 @@ html, body {
 .signup-logo-text {
   font-size: 25px;
   font-weight: 700;
-  text-align: center;          /* เว้นระยะใต้รูป */
-  color: #3F3E6C;
+  color: #003366; /* เปลี่ยนเป็นสีน้ำเงิน */
   margin: -90px 0 0 !important;
+  text-align: center !important;
 }
 
 .signup-title {
-  margin-bottom: 10px;
-  font-size: 27px;
-  font-weight: 700;
-  color: #000;
-  /* margin: 35px 0 0; */
+  margin-bottom:5px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #000;
 }
 
 .signup-form {
@@ -125,7 +132,7 @@ html, body {
 
   .signup-logo-text {
     font-size: 18px;
-    margin-top: -15%;
+    margin-top: -43%;
   }
 
   .signup-title {
