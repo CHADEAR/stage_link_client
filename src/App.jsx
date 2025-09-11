@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import Layout from "./components/layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -7,73 +7,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/Login";
 import SignUpPage from "./pages/Register";
 import ForgotPasswordPage from "./pages/OTP";
-import Test from "./pages/Test"; 
+import Programme from "./pages/Programme";   // ⬅️ หน้าหลักใหม่
 
-// api
 import {
-  listNotes, createNote,
-  login as apiLogin, register as apiRegister,
+  login as apiLogin,
+  register as apiRegister,
   getAccessToken
 } from "./services/api";
-
-function HomePage() {
-  const [notes, setNotes] = useState([]);
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function refreshNotes() {
-    setLoading(true);
-    try {
-      const data = await listNotes();
-      setNotes(data);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    refreshNotes();
-  }, []);
-
-  async function onAddNote(e) {
-    e.preventDefault();
-    const v = text.trim();
-    if (!v) return;
-    await createNote(v);
-    setText("");
-    await refreshNotes();
-  }
-
-  return (
-    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16 }}>
-      <h2 style={{ marginTop: 0 }}>Notes</h2>
-
-      <form onSubmit={onAddNote} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <input
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder={getAccessToken() ? "Type note..." : "Login ก่อนจึงจะเพิ่มได้"}
-          disabled={!getAccessToken()}
-          style={{ flex: 1, padding: 10, borderRadius: 6, border: "1px solid #ccc" }}
-        />
-        <button type="submit" disabled={!getAccessToken()} style={{ padding: "10px 14px", borderRadius: 6, border: "1px solid #999" }}>
-          Add
-        </button>
-      </form>
-
-      {loading ? <p>Loading…</p> : (
-        <ul style={{ paddingLeft: 18 }}>
-          {notes.map(n => (
-            <li key={n.id} style={{ marginBottom: 6 }}>
-              <strong>#{n.id}</strong> — {n.body}{" "}
-              <em style={{ opacity: 0.7 }}>({new Date(n.created_at).toLocaleString()})</em>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
 
 export default function App() {
   const navigate = useNavigate();
@@ -88,19 +28,16 @@ export default function App() {
 
   async function handleRegister({ email, password, username }) {
     await apiRegister(email.trim(), password, username);
-    alert("สมัครสำเร็จ กรุณาเข้าสู่ระบบ"); 
+    alert("สมัครสำเร็จ กรุณาเข้าสู่ระบบ");
     navigate("/login", { replace: true });
   }
-
-  // const [page, setPage] = useState("login");
 
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* เส้นทางที่ล็อกอินแล้วเท่านั้น */}
+        {/* เส้นทางที่ต้องล็อกอินก่อน */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/test" element={<Test />} />
+          <Route path="/" element={<Programme />} />   {/* ⬅️ หน้าแรก = Programme */}
         </Route>
 
         {/* public routes */}
@@ -108,11 +45,13 @@ export default function App() {
           path="/login"
           element={
             !getAccessToken()
-              ? <LoginPage
+              ? (
+                <LoginPage
                   onSubmit={handleLogin}
                   onSwitchToSignUp={() => navigate("/register")}
                   onSwitchToForgotPassword={() => navigate("/forgot-password")}
                 />
+              )
               : <Navigate to="/" replace />
           }
         />
@@ -129,10 +68,7 @@ export default function App() {
           element={
             <ForgotPasswordPage
               onBackToLogin={() => navigate("/login")}
-              onSubmit={(email) => {
-                // handle forgot password logic here
-                alert(`Reset link sent to ${email}`);
-              }}
+              onSubmit={(email) => alert(`Reset link sent to ${email}`)}
             />
           }
         />

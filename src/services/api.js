@@ -2,50 +2,96 @@
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // ---------- Token helpers ----------
-let accessToken = null;
+
+const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
 
-export function setAccessToken(tok) { accessToken = tok || null; }
-export function getAccessToken() { return accessToken; }
-export function setRefreshToken(tok) { if (tok) localStorage.setItem(REFRESH_KEY, tok); }
-export function getRefreshToken() { return localStorage.getItem(REFRESH_KEY); }
-export function clearTokens() { accessToken = null; localStorage.removeItem(REFRESH_KEY); }
+export function setAccessToken(tok) {
+  if (tok) {
+    localStorage.setItem(ACCESS_KEY, tok);
+  } else {
+    localStorage.removeItem(ACCESS_KEY);
+  }
+}
+
+export function getAccessToken() {
+  const tok = localStorage.getItem(ACCESS_KEY);
+  if (!tok || tok === "null" || tok === "undefined") return null;
+  return tok;
+}
+
+export function setRefreshToken(tok) {
+  if (tok) localStorage.setItem(REFRESH_KEY, tok);
+  else localStorage.removeItem(REFRESH_KEY);
+}
+
+export function getRefreshToken() {
+  const tok = localStorage.getItem(REFRESH_KEY);
+  if (!tok || tok === "null" || tok === "undefined") return null;
+  return tok;
+}
+
+export function clearTokens() {
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+}
 
 // ---------- Low-level fetch (+ auto refresh) ----------
+
 async function doFetch(path, options = {}) {
   const { method = "GET", headers = {}, body, auth = false } = options;
+
   const h = { ...headers };
-  if (auth && accessToken) h.Authorization = `Bearer ${accessToken}`;
   if (body && !h["Content-Type"]) h["Content-Type"] = "application/json";
+  if (!h["Accept"]) h["Accept"] = "application/json";
 
-  const res = await fetch(`${baseURL}${path}`, { method, headers: h, body: body ? JSON.stringify(body) : undefined });
+  // ✅ อ่าน token สดจาก localStorage ทุกครั้ง (ไม่พึ่งตัวแปรในหน่วยความจำ)
+  if (auth) {
+    const tok = getAccessToken();
+    if (tok) h.Authorization = `Bearer ${tok}`;
+  }
 
-  // ถ้า access หมดอายุและเป็น endpoint ที่ต้อง auth → ลอง refresh แล้ว retry 1 ครั้ง
+  const req = () =>
+    fetch(`${baseURL}${path}`, {
+      method,
+      headers: h,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+  let res = await req();
+
+  // ถ้า 401 และต้อง auth -> refresh แล้วลองใหม่ 1 ครั้ง
   if (res.status === 401 && auth) {
-    const newAccess = await refreshAccessToken();
+    const newAccess = await refreshAccessToken(); // ควร setAccessToken ภายในฟังก์ชันนี้แล้ว
     if (newAccess) {
       h.Authorization = `Bearer ${newAccess}`;
-      const res2 = await fetch(`${baseURL}${path}`, { method, headers: h, body: body ? JSON.stringify(body) : undefined });
-      if (!res2.ok) throw await parseErr(res2);
-      return res2.json();
+      res = await req();
     }
   }
 
   if (!res.ok) throw await parseErr(res);
-  // บาง endpoint อาจตอบ {ok:true} หรือไม่มี body → พยายาม parse ถ้าไม่ได้ให้คืน {} แทน
-  try { return await res.json(); } catch { return {}; }
+
+  // รองรับ 204/ไม่มี body
+  if (res.status === 204) return {};
+
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
 }
 
 async function parseErr(res) {
   try {
     const data = await res.json();
-    throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+    return new Error(data?.error || data?.message || `HTTP ${res.status}`);
   } catch {
-    throw new Error(`HTTP ${res.status}`);
+    return new Error(`HTTP ${res.status}`);
   }
 }
 
 // ---------- Auth ----------
+
 export async function register(email, password, username) {
   // backend ปัจจุบันไม่คืน token ใน /register
   return doFetch("/auth/register", { method: "POST", body: { email, password, username } });
@@ -91,10 +137,3 @@ export function resetPasswordWithCode(email, code, password) {
   return doFetch("/auth/reset-code", { method: "POST", body: { email, code, password } });
 }
 
-// ---------- Notes ----------
-export function listNotes() {
-  return doFetch("/notes", { method: "GET" });
-}
-export function createNote(body) {
-  return doFetch("/notes", { method: "POST", auth: true, body: { body } });
-}

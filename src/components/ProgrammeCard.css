@@ -1,0 +1,114 @@
+.prog-card {
+  display: flex;
+  flex-direction: row;
+}
+
+.prog-card img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-right: 10px;
+}
+
+.front-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #f6f7fb;
+}
+
+.front-shell.side-collapsed {
+  grid-template-columns: 72px 1fr;
+}
+
+.front-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.front-content {
+  padding: 24px 28px 40px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.date-chip {
+  background: #e6f0ff;
+  color: #0b57d0;
+  border: 1px solid #cfe0ff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.toolbar-icons {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  border: 1px solid #e6e8ee;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.only-mobile {
+  display: none;
+}
+
+.card-grid {
+  padding: 0px 5% 0px 0px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* Breakpoints */
+@media (max-width: 1200px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .only-mobile {
+    display: inline-flex;
+  }
+
+  /* ปุ่ม burger & close */
+  .front-shell {
+    grid-template-columns: 1fr;
+  }
+
+  /* ไม่กันที่ให้ sidebar */
+  .front-content {
+    padding: 18px 16px 28px;
+  }
+}
+
+/* overlay เฉพาะ mobile */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .4);
+  z-index: 90;
+}

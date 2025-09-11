@@ -1,0 +1,143 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+/* Base (desktop) */
+.front-side {
+  width: 240px;
+  background: #12223a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  transition: width .25s ease, transform .25s ease;
+  z-index: 100;
+}
+
+.front-side.collapsed {
+  width: 72px;
+}
+
+/* Brand (โลโก้ + ปุ่ม) */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 18px;
+  border-bottom: 1px solid #20314c;
+  font-weight: 700;
+}
+
+.brand img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  transition: opacity .2s ease, width .2s ease;
+}
+
+.brand .label {
+  transition: opacity .2s ease, width .2s ease;
+  white-space: nowrap;
+}
+
+/* เมื่อ collapse → logo + text หายไป */
+.front-side.collapsed .brand img,
+.front-side.collapsed .brand .label {
+  opacity: 0;
+  width: 0;
+  margin: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ปุ่ม collapse */
+.collapse-btn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  /* ขนาดคงที่ */
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: #cbd7f2;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+  background: #1a2d4d;
+}
+
+/* Nav items */
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+}
+
+.side-item {
+  color: #dbe7ff;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-left: 4px solid transparent;
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.side-item:hover {
+  background: #1a2d4d;
+}
+
+.side-item.active {
+  background: #1f3a66;
+  border-left-color: #7aa7ff;
+  color: #fff;
+}
+
+.mi {
+  font-variation-settings: 'wght' 400;
+}
+
+.side-item .label {
+  transition: opacity .2s ease, width .2s ease;
+  white-space: nowrap;
+}
+
+.front-side.collapsed .side-item .label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+/* Bottom logout */
+.side-bottom {
+  margin-top: auto;
+  padding: 8px;
+  border-top: 1px solid #20314c;
+}
+
+.logout-btn {
+  width: 100%;
+  background: #0f1e34;
+  color: #ffc9c9;
+  border: 1px solid #243a5f;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.front-side.collapsed .logout-btn .label {
+  display: none;
+}
