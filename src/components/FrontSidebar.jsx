@@ -1,6 +1,8 @@
 import React from "react";
+import { logout, setAccessToken } from "../services/api"; 
 import { Link, useLocation } from "react-router-dom";
 import "./FrontSidebar.css";
+import stageLogo from "../assets/Stage.png"; 
 
 function Item({ to, label, icon }) {
   const { pathname } = useLocation();
@@ -13,12 +15,19 @@ function Item({ to, label, icon }) {
   );
 }
 
+function onLogout() {
+  logout().finally(() => {
+    setAccessToken(null);
+    window.location.href = "/login";
+  });
+}
+
 export default function FrontSidebar({ collapsed, open, onToggleCollapse, onCloseMobile }) {
   return (
     <aside className={`front-side ${collapsed ? "collapsed" : ""} ${open ? "open" : ""}`}>
       <div className="side-top">
         <div className="brand">
-          <img src="../assets/Stage.png" alt="StageLink" />
+          <img src={stageLogo} alt="StageLink" />
           <span className="label">StageLink</span>
 
           {/* ปุ่มยุบ/ขยายอยู่ขวาสุดเสมอ */}
@@ -43,7 +52,7 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
       </div>
 
       <div className="side-bottom">
-        <button className="logout-btn">
+        <button className="logout-btn" onClick={onLogout}>
           <span className="material-symbols-outlined mi">logout</span>
           <span className="label">Logout</span>
         </button>

@@ -33,8 +33,8 @@
 }
 
 .brand img {
-  width: 24px;
-  height: 24px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
   transition: opacity .2s ease, width .2s ease;
 }
@@ -136,7 +136,23 @@
   align-items: center;
   gap: 10px;
   justify-content: center;
+  cursor: pointer;             /* แสดง cursor เป็นมือ */
+  transition: all 0.2s ease;   /* ทำให้การเปลี่ยนสีลื่นไหล */
 }
+
+/* เมื่อ hover */
+.logout-btn:hover {
+  background: #152642;         /* สีพื้นหลังอ่อนลง */
+  color: #fff;                 /* ตัวหนังสือสว่างขึ้น */
+  border-color: #35507a;
+}
+
+/* เมื่อกดคลิก */
+.logout-btn:active {
+  background: #1e3353;         /* กดแล้วเข้มขึ้นอีก */
+  transform: scale(0.97);      /* ย่อปุ่มลงเล็กน้อย */
+}
+
 
 .front-side.collapsed .logout-btn .label {
   display: none;

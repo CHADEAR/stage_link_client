@@ -6,7 +6,7 @@ function StatusDot({ status = "green" }) {
   return <span className={`status-dot ${status}`} />;
 }
 
-export default function ProgrammeCard({ title, time, img, status }) {
+export default function ProgrammeCard({ title, time, status }) {
   return (
     <div className="prog-card">
       <div className="thumb">
@@ -14,11 +14,15 @@ export default function ProgrammeCard({ title, time, img, status }) {
       </div>
 
       <div className="prog-body">
-        <div className="line">
+       <div className="hdline">
+         <div className="line">
           <StatusDot status={status} />
           <span className="label">รายการ {title}</span>
         </div>
+
         <div className="time">ถ่ายทอดเวลา : {time}</div>
+       
+       </div>
 
         <div className="action-row">
           <button className="detail-btn">รายละเอียดการจัดรายการ</button>

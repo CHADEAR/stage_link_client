@@ -1,14 +1,15 @@
 .prog-card {
+  height: 120px;
   display: flex;
   flex-direction: row;
 }
 
 .prog-card img {
-  width: 120px;
-  height: 80px;
+  width: 200px;
+  height: 120px;
   object-fit: cover;
   border-radius: 12px;
-  margin-right: 10px;
+  margin-right: 20px;
 }
 
 .front-shell {
@@ -80,6 +81,25 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
+}
+
+.detail-btn{
+  background: #e6f0ff;
+  color: #0b57d0;
+  border: 1px solid #cfe0ff;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.prog-body{
+  display: flex;
+  flex-direction: column;
+}
+
+.prog-body .action-row{
+  margin-top: auto;
+  margin-bottom: 5px;
 }
 
 /* Breakpoints */
