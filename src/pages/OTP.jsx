@@ -1,4 +1,3 @@
-// src/pages/OTP.jsx
 import React, { useState } from "react";
 import "./OTP.css";
 import logo from "../assets/Stage.png";
@@ -46,8 +45,7 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
   }
 
   async function handleVerifyOtp() {
-    setErr(""); 
-    setMsg("");
+    setErr(""); setMsg("");
 
     const code = otp.join("");
     if (code.length !== 6) {
@@ -94,7 +92,7 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
 
       {/* STEP 1 : EMAIL */}
       {step === "email" && (
-        <div className="otp-reset-box">
+        <div className="otp-box">
           <h3 className="otp-title">Reset your password</h3>
           <p className="otp-desc">
             Forgotten your password? Enter your email address below,<br />
@@ -103,7 +101,7 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
           </p>
           <form className="otp-form" onSubmit={handleVerifyEmail}>
             <div className="otp-input-group">
-              <span className="otp-icon">📧</span>
+              <span className="otp-icon"></span>
               <input
                 type="email"
                 placeholder="Email"
@@ -112,7 +110,7 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
                 required
               />
             </div>
-            <button className="otp-verify-btn" type="submit" disabled={loading}>
+            <button className="otp-btn" type="submit" disabled={loading}>
               {loading ? "Sending..." : "Verify email OTP"}
             </button>
           </form>
@@ -123,10 +121,10 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
 
       {/* STEP 2 : OTP */}
       {step === "otp" && (
-        <div className="otp-reset-box">
+        <div className="otp-box">
           <h3 className="otp-title">Reset your password</h3>
           <p className="otp-desc">
-            A 6 digit OTP was sent to <b>{email}</b>.<br />
+            A 6 digit email OTP was sent to <b>{email}</b>.<br />
             Enter that code here to proceed
           </p>
 
@@ -143,20 +141,16 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
             ))}
           </div>
 
-          <div className="otp-btn-group">
-            <button className="otp-back-btn" onClick={() => setStep("email")} disabled={loading}>
-              Back
-            </button>
-            <button className="otp-verify-btn" onClick={handleVerifyOtp} disabled={loading}>
-              Verify email OTP
-            </button>
-          </div>
+          <button className="otp-btn" onClick={handleVerifyOtp} disabled={loading}>
+            {loading ? "Verifying..." : "Verify email OTP"}
+          </button>
 
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 12 }}>
             <button className="otp-link-btn" onClick={handleVerifyEmail} disabled={loading}>
               Resend OTP
             </button>
           </div>
+
           {msg && <p className="otp-note otp-ok">{msg}</p>}
           {err && <p className="otp-note otp-error">{err}</p>}
         </div>
@@ -164,33 +158,31 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
 
       {/* STEP 3 : CHANGE PASSWORD */}
       {step === "change" && (
-        <div className="otp-change-box">
-          <h3 className="otp-change-title">Change Password</h3>
+        <div className="otp-box">
+          <h3 className="otp-title">Change Password</h3>
 
-          <form className="otp-change-form" onSubmit={handleChangePassword}>
-            <div className="otp-change-field">
-              <label className="otp-change-label">Password</label>
+          <form className="otp-form" onSubmit={handleChangePassword}>
+            <div className="otp-input-group">
               <input
-                className="otp-change-input"
                 type="password"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
 
-            <div className="otp-change-field">
-              <label className="otp-change-label">Confirm Password</label>
+            <div className="otp-input-group">
               <input
-                className="otp-change-input"
                 type="password"
+                placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
 
-            <button className="otp-change-btn" type="submit" disabled={loading}>
+            <button className="otp-btn" type="submit" disabled={loading}>
               {loading ? "Saving..." : "Change Password"}
             </button>
           </form>

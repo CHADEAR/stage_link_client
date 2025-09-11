@@ -30,8 +30,10 @@ function SignUpPage({ onSwitchToLogin, onSubmit }) {
 
   return (
     <div className="signup-container">
-      <img src={logo} alt="Stage Logo" className="signup-logo" />
-      <div className="signup-logo-text">StageLink</div>
+      <div className="signup-logo-container">
+        <img src={logo} alt="Stage Logo" className="signup-logo" />
+        <div className="signup-logo-text">StageLink</div>
+      </div>
       <h2 className="signup-title">Sign Up</h2>
 
       <form className="signup-form" onSubmit={handleSubmit}>
