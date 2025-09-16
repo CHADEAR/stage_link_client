@@ -8,8 +8,10 @@ html, body {
   margin: 0;
   height: 100%;
   font-family: "Inter", system-ui, sans-serif;
-  color: #222;              /* เปลี่ยนสีตัวหนังสือหลักเป็นสีดำ */
+  color: #222;
   background-color: #ffffff !important;
+  width: 100vw;
+  min-height: 100vh;
 }
 
 .login-container {
@@ -17,32 +19,33 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 70vh;
-  margin-top: 0;            /* ลบ margin-top ที่เป็น -80px */
+  min-height: 100vh; /* เปลี่ยนจาก height: 70vh */
+  width: 100vw;
   text-align: center;
-  background: #fff;         /* เพิ่มพื้นหลังขาวให้ container ด้วย */
+  background: #fff;
+  box-sizing: border-box;
 }
 
 /* container */
 .login-logo{
   display: flex;
-  flex-direction: column;   
-  align-items: center;      
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   margin-bottom: 50px;
 }
 
 .login-logo img {
-  width: 20rem;
+  width: 16rem;
   display: block;
-  margin: 1 auto; 
+  margin: 0 auto;
 }
 
 .login-logo-text {
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 700;
-  color: #3F3E6C;
-  margin: -90px 0 0 !important;   /* เว้นระยะด้านบน 10px */
+  color: #003366;
+  margin: -70px 0 0 !important;   /* เว้นระยะด้านบน 10px */
   text-align: center !important;
 }
 
@@ -146,12 +149,12 @@ html, body {
 /* responsive */
 @media (max-width: 480px) {
   .login-logo img {
-    width: 10rem;
+    width: 8rem;
   }
 
   .login-logo-text {
-    font-size: 18px;
-    margin-top: -43%;
+    font-size: 15px;
+    margin-top: -35%;
   }
 
   .login-title {
