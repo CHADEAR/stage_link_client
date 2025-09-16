@@ -46,7 +46,7 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
 
         <nav className="side-nav">
           <Item to="/" label="Programme" icon="tv_guide" />
-          <Item to="/users" label="User" icon="group" />
+          <Item to="/user" label="User" icon="group" />
           <Item to="/admin" label="Admin" icon="admin_panel_settings" />
           <Item to="/upload" label="Upload" icon="upload_file" />
         </nav>

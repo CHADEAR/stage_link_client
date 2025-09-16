@@ -9,6 +9,7 @@ import SignUpPage from "./pages/Register";
 import ForgotPasswordPage from "./pages/OTP";
 import Programme from "./pages/Programme";  
 import Upload from "./pages/upload";
+import User from "./pages/User";
 
 import {
   login as apiLogin,
@@ -40,6 +41,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Programme />} />   {/* ⬅️ หน้าแรก = Programme */}
           <Route path="/upload" element={<Upload />} />
+          <Route path="/user" element={<User />} />
         </Route>
 
         {/* public routes */}
