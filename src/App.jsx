@@ -7,7 +7,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/Login";
 import SignUpPage from "./pages/Register";
 import ForgotPasswordPage from "./pages/OTP";
-import Programme from "./pages/Programme";   // ⬅️ หน้าหลักใหม่
+import Programme from "./pages/Programme";  
+import Upload from "./pages/upload";
 
 import {
   login as apiLogin,
@@ -38,6 +39,7 @@ export default function App() {
         {/* เส้นทางที่ต้องล็อกอินก่อน */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Programme />} />   {/* ⬅️ หน้าแรก = Programme */}
+          <Route path="/upload" element={<Upload />} />
         </Route>
 
         {/* public routes */}

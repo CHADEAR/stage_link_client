@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import FrontSidebar from "../components/FrontSidebar";
 import FrontNavbar from "../components/FrontNavbar";
 import ProgrammeCard from "../components/ProgrammeCard";
@@ -50,54 +50,100 @@ const mockItems = [
 ];
 
 export default function Programme() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop collapse
-  const [menuOpen, setMenuOpen] = useState(false);                 // mobile drawer
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(new Date()); // วันที่จากปฏิทิน
+  const dateInputRef = useRef(null);
+
+  // นาฬิกาปัจจุบัน
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // format ไทย
+  const formatThaiDate = (d) =>
+    d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const formatThaiTime = (d) =>
+    d.toLocaleTimeString("th-TH", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,   // ให้เป็น 24 ชั่วโมง
+    });
+
+  // value สำหรับ <input type="date"> (กัน timezone เพี้ยน)
+  const toInputValue = (d) => {
+    const tz = d.getTimezoneOffset() * 60 * 1000;
+    const local = new Date(d.getTime() - tz);
+    return local.toISOString().slice(0, 10);
+  };
+
+  const openDatePicker = () => {
+    const el = dateInputRef.current;
+    if (!el) return;
+    if (typeof el.showPicker === "function") el.showPicker();
+    else { el.focus(); el.click(); }
+  };
 
   return (
-    <div
-      className={[
-        "front-shell",
-        sidebarCollapsed ? "side-collapsed" : "",
-        menuOpen ? "mobile-open" : ""
-      ].join(" ")}
-    >
+    <div className={["front-shell", sidebarCollapsed ? "side-collapsed" : "", menuOpen ? "mobile-open" : ""].join(" ")}>
       <FrontSidebar
         collapsed={sidebarCollapsed}
         open={menuOpen}
         onToggleCollapse={() => setSidebarCollapsed(v => !v)}
         onCloseMobile={() => setMenuOpen(false)}
+        // ⬇️ ส่งวันที่ที่ “เลือกจากปฏิทิน” ไปให้ Sidebar
+        selectedDateLabel={formatThaiDate(selectedDate)}
       />
 
       <div className="front-main">
         <FrontNavbar
-          dateStr="30 ส.ค 2568"
-          timeStr="12.00 น."
-          onToggleMenu={() => setMenuOpen(v => !v)} // ปุ่มเมนูบน navbar (ใช้เฉพาะมือถือ)
+          // ⬇️ Navbar ใช้ “เวลาปัจจุบัน”
+          dateStr={formatThaiDate(now)}
+          timeStr={formatThaiTime(now)}
+          onToggleMenu={() => setMenuOpen(v => !v)}
         />
 
         <div className="front-content">
           <div className="page-title">Programme</div>
+
           <div className="toolbar">
-            <button className="date-chip">วันอาทิตย์ 30 สิงหาคม 2568</button>
-            <div className="toolbar-icons">
-              <button className="icon-btn" title="ปฏิทิน">
-                <span className="material-symbols-outlined">calendar_month</span>
-              </button>
-              <button className="icon-btn" title="สลับมุมมอง">
-                <span className="material-symbols-outlined">dashboard</span>
-              </button>
+            <div className="toolbar-right">
+              <button className="date-chip">{formatThaiDate(selectedDate)}</button>
+
+              <div className="toolbar-icons">
+                <div className="calendar-anchor" style={{ position: "relative", display: "inline-block" }}>
+                  <button className="icon-btn" title="ปฏิทิน" onClick={openDatePicker}>
+                    <span className="material-symbols-outlined">calendar_month</span>
+                  </button>
+                  <input
+                    ref={dateInputRef}
+                    type="date"
+                    className="hidden-date-input"
+                    value={toInputValue(selectedDate)}
+                    onChange={(e) => {
+                      const [y, m, d] = e.target.value.split("-").map(Number);
+                      setSelectedDate(new Date(y, m - 1, d));
+                    }}
+                  />
+                </div>
+
+                <button className="icon-btn" title="สลับมุมมุมมอง">
+                  <span className="material-symbols-outlined">dashboard</span>
+                </button>
+              </div>
             </div>
           </div>
 
+
           <div className="card-grid">
-            {mockItems.map(it => (
-              <ProgrammeCard key={it.id} {...it} />
-            ))}
+            {mockItems.map(it => (<ProgrammeCard key={it.id} {...it} />))}
           </div>
         </div>
       </div>
 
-      {/* overlay เฉพาะ mobile */}
       {menuOpen && <div className="mobile-overlay" onClick={() => setMenuOpen(false)} />}
     </div>
   );
