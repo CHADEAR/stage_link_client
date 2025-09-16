@@ -33,7 +33,7 @@
 }
 
 .brand img {
-  width: 50px;
+  width: 60px;
   height: 50px;
   object-fit: contain;
   transition: opacity .2s ease, width .2s ease;
@@ -127,9 +127,9 @@
 
 .logout-btn {
   width: 100%;
-  background: #0f1e34;
-  color: #ffc9c9;
-  border: 1px solid #243a5f;
+  background: #1f5099;
+  color: #fcfcfc;
+  border: 1px solid #ffffff;
   padding: 12px;
   border-radius: 8px;
   display: flex;
@@ -142,9 +142,9 @@
 
 /* เมื่อ hover */
 .logout-btn:hover {
-  background: #152642;         /* สีพื้นหลังอ่อนลง */
-  color: #fff;                 /* ตัวหนังสือสว่างขึ้น */
-  border-color: #35507a;
+  background: #ff3b3b;   /* สีแดง */
+  color: #fff;           /* ตัวหนังสือขาว */
+  border-color: #ff3b3b; /* ขอบแดง */
 }
 
 /* เมื่อกดคลิก */
