@@ -1,0 +1,161 @@
+/* ProgrammeDetail.css */
+
+/* ========== RESET กันโดนทำให้ซีดจากเลย์เอาต์ชั้นนอก ========== */
+.programme-grid,
+.programme-grid * {
+  color: inherit;
+}
+.programme-grid {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* ========== โครงร่างหน้าหลัก ========== */
+.programme-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  color: #0c2b4a; /* โทนเข้ม อ่านง่าย */
+}
+
+/* คอลัมน์ซ้าย/ขวาให้ใช้สีเข้มเหมือนกัน */
+.left-pane,
+.right-pane {
+  color: #0c2b4a;
+}
+
+/* ========== หัวข้อส่วนซ้าย ("เกมส์โชว์") ========== */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+/* ========== การ์ดข้อมูลรายการซ้าย ========== */
+.show-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.show-img {
+  width: 220px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  display: block;
+}
+
+.show-meta {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.live-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #e53935;   /* จุดแดง LIVE */
+  box-shadow: 0 0 0 2px rgba(229,57,53,.15);
+}
+
+.show-name { font-weight: 700; }
+.air-time  { color: #4d6484; }
+
+/* ========== ปุ่มแนวตั้ง (จัดการสตูดิโอ/ควบคุมไฟ/โหวต) ========== */
+.action-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.action-btn {
+  display: block;
+  text-align: center;
+  padding: 12px 14px;
+  background: #e5eefc;
+  border: 1px solid #c2d3f8;
+  border-radius: 12px;
+  font-weight: 700;
+  color: #0c2b4a;
+  text-decoration: none;
+  box-shadow: 0 2px 0 rgba(12,43,74,.06);
+  transition: background .15s ease, transform .05s ease, box-shadow .15s ease;
+}
+.action-btn:hover {
+  background: #d7e5fb;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(12,43,74,.08);
+}
+.action-btn.active {
+  background: #cbdafc;
+  border-color: #9bb9ff;
+}
+
+/* ========== ส่วนขวา - แถบหัว + การ์ดรายละเอียด ========== */
+.page-topbar {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0c2b4a;
+}
+
+.top-date {
+  color: #0c2b4a;
+  background: #eef2f7;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+
+.detail-panel {
+  background: #fff;
+  border: 1px solid #cfd6e4;
+  border-radius: 10px;
+  min-height: 420px;
+  padding: 16px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  overflow: hidden;
+}
+
+.detail-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 800;
+  color: #2b3c52;
+}
+
+/* ปุ่ม Back */
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #2b3c52;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.back-btn:hover { text-decoration: underline; }
