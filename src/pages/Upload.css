@@ -1,0 +1,116 @@
+.upload-container {
+  font-family: "Arial", sans-serif;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: calc(100vh - 56px); /* เผื่อ navbar สูง 56px */
+}
+
+.title {
+  font-size: 25px;
+  font-weight: bold;
+  margin-bottom: 95px;
+}
+
+.content {
+  display: flex;
+  gap: 40px;
+}
+
+/* ฝั่งซ้าย */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+}
+
+.video-box {
+  width: 100%;
+  height: 220px;
+  background: #eaeaea;
+  border: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.play-icon {
+  font-size: 24px;
+  color: #555;
+}
+
+.menu-btn {
+  background: #d9ecff;
+  border: none;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+/* ฝั่งขวา */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.input-with-icon {
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon input {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+}
+
+.edit-btn {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+}
+
+textarea {
+  min-height: 80px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.submit-btn {
+  background: #1e90ff;
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 20px;
+}

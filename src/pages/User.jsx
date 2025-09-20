@@ -147,19 +147,21 @@ export default function UserTable() {
         <FrontNavbar dateStr={dateStr} timeStr={timeStr} />
 
         <div className="user-container" style={{ padding: 24 }}>
-          {/* ปุ่ม back อยู่ทุกหน้า */}
-          <div style={{ marginBottom: 10 }}>
-            <button
-              className="back-btn"
-              onClick={() => {
-                setSelectedUser(null);
-                setEditMode(false);
-              }}
-              title="Back"
-            >
-              ← <span style={{ fontSize: 15, marginLeft: 2 }}>back</span>
-            </button>
-          </div>
+          {/* ปุ่ม back เฉพาะหน้าโปรไฟล์ */}
+          {selectedUser && (
+            <div style={{ marginBottom: 10 }}>
+              <button
+                className="back-btn"
+                onClick={() => {
+                  setSelectedUser(null);
+                  setEditMode(false);
+                }}
+                title="Back"
+              >
+                ← <span style={{ fontSize: 15, marginLeft: 2 }}>back</span>
+              </button>
+            </div>
+          )}
           {/* ถ้าเลือก user แล้ว → แสดงหน้าโปรไฟล์ */}
           {selectedUser ? (
             <div className="profile-container">
