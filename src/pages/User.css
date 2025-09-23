@@ -1,0 +1,135 @@
+/* ตารางผู้ใช้ */
+.user-container {
+  font-family: "Prompt", sans-serif;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+select,
+button {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e5e5e5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background: green;
+}
+
+.status-dot.inactive {
+  background: red;
+}
+
+/* หน้าโปรไฟล์ */
+.profile-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  font-family: "Prompt", sans-serif;
+  padding: 30px;
+}
+
+.profile-image {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+}
+
+.camera-icon {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-details p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.edit-btn {
+  margin-top: 15px;
+  background: #7cbbeb;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.edit-btn:hover {
+  background: #5f7bdf;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #101214ff;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.back-btn:hover {
+  color: #ff3b3b;
+}

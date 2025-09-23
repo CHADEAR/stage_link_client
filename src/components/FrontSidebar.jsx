@@ -61,6 +61,9 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
               
             </>
           )}
+          <Item to="/user" label="User" icon="group" />
+          <Item to="/admin" label="Admin" icon="admin_panel_settings" />
+          <Item to="/upload" label="Upload" icon="upload_file" />
         </nav>
       </div>
 
