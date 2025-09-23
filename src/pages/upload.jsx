@@ -144,7 +144,7 @@ export default function UploadPage() {
               <div className="right-panel" style={{ flex: 1 }}>
                 <div className="form-group">
                   <label>ชื่อรายการ</label>
-                  <d className="input-with-icon">
+                  <div className="input-with-icon">
                     <input type="text" defaultValue="นักร้องข้ามกำแพง" />
                     <button className="edit-btn-upload" type="button">✎</button>
                   </div>
