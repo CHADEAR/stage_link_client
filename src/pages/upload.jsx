@@ -89,8 +89,8 @@ export default function UploadPage() {
                     cursor: "pointer",
                     position: "relative",
                     overflow: "hidden",
-                    border: "2px dashed #b0b0b0",
-                    background: "#eaeaea",
+                    border: "2px dashed #a7a6a6ff",
+                    background: "#efefefff",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center"
@@ -144,9 +144,9 @@ export default function UploadPage() {
               <div className="right-panel" style={{ flex: 1 }}>
                 <div className="form-group">
                   <label>ชื่อรายการ</label>
-                  <div className="input-with-icon">
+                  <d className="input-with-icon">
                     <input type="text" defaultValue="นักร้องข้ามกำแพง" />
-                    <button className="edit-btn" type="button">✎</button>
+                    <button className="edit-btn-upload" type="button">✎</button>
                   </div>
                 </div>
 

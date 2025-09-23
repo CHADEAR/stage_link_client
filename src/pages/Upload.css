@@ -22,7 +22,7 @@
 .left-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   width: 320px;
 }
 
@@ -30,7 +30,7 @@
   width: 100%;
   height: 220px;
   background: #eaeaea;
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +49,7 @@
 }
 
 .menu-btn {
-  background: #d9ecff;
+  background: #73a7db;
   border: none;
   padding: 10px;
   text-align: center;
@@ -88,12 +88,17 @@
   border-radius: 4px 0 0 4px;
 }
 
-.edit-btn {
-  background: #eee;
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-  cursor: pointer;
-  border-radius: 0 4px 4px 0;
+.edit-btn-upload {
+  background: #8ad9f2;
+  border: 1px solid #d9d4d4;
+  padding: 10px 10px;
+  /* cursor: pointer; */
+  /* border-radius: 0 4px 4px 0; */
+}
+
+.edit-btn-upload:hover {
+  background: #b4ffb0;   /* สีแดง */
+  border-color: #ffffff; /* ขอบแดง */
 }
 
 textarea {
@@ -104,7 +109,7 @@ textarea {
 }
 
 .submit-btn {
-  background: #1e90ff;
+  background: #625df0;
   color: white;
   border: none;
   padding: 12px;
