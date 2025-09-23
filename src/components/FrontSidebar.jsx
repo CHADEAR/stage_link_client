@@ -1,12 +1,17 @@
 import React from "react";
-import { logout, setAccessToken } from "../services/api"; 
+import { logout, setAccessToken } from "../services/api";
 import { Link, useLocation } from "react-router-dom";
 import "./FrontSidebar.css";
-import stageLogo from "../assets/Stage.png"; 
+import stageLogo from "../assets/Stage.png";
+import useAuth from "../hooks/useAuth";
 
 function Item({ to, label, icon }) {
   const { pathname } = useLocation();
   const active = pathname === to;
+  const { user } = useAuth();
+
+  console.log("🔑 Current user role:", user?.role);
+
   return (
     <Link to={to} className={`side-item ${active ? "active" : ""}`} title={label}>
       <span className="material-symbols-outlined mi">{icon}</span>
@@ -23,6 +28,8 @@ function onLogout() {
 }
 
 export default function FrontSidebar({ collapsed, open, onToggleCollapse, onCloseMobile }) {
+  const { user } = useAuth(); // ✅ ดึง user role ออกมา
+
   return (
     <aside className={`front-side ${collapsed ? "collapsed" : ""} ${open ? "open" : ""}`}>
       <div className="side-top">
@@ -30,7 +37,7 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
           <img src={stageLogo} alt="StageLink" />
           <span className="label">StageLink</span>
 
-          {/* ปุ่มยุบ/ขยายอยู่ขวาสุดเสมอ */}
+          {/* ปุ่มยุบ/ขยาย */}
           <button
             className="collapse-btn"
             onClick={onToggleCollapse}
@@ -43,12 +50,17 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
           </button>
         </div>
 
-
         <nav className="side-nav">
           <Item to="/" label="Programme" icon="tv_guide" />
-          <Item to="/users" label="User" icon="group" />
-          <Item to="/admin" label="Admin" icon="admin_panel_settings" />
-          <Item to="/upload" label="Upload" icon="upload_file" />
+
+          {/* ✅ แสดงเมนูเฉพาะ admin */}
+          {user?.role === "admin" && (
+            <>
+              <Item to="/admin/users" label="User " icon="group" />
+              <Item to="/admin/programs" label="Upload" icon="upload_file" />
+              
+            </>
+          )}
         </nav>
       </div>
 
@@ -59,7 +71,7 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
         </button>
       </div>
 
-      {/* ปิดจากด้านในตอน mobile */}
+      {/* ปิดเมนูบน mobile */}
       <button className="close-mobile only-mobile" onClick={onCloseMobile} aria-label="Close menu">
         <span className="material-symbols-outlined">close</span>
       </button>

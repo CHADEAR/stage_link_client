@@ -1,7 +1,10 @@
 import React from "react";
 import "./FrontNavbar.css";
+import { useNavigate } from "react-router-dom";
 
 export default function FrontNavbar({ dateStr, timeStr }) {
+  const navigate = useNavigate();
+
   return (
     <header className="front-bar">
       <div className="bar-left">
@@ -25,7 +28,11 @@ export default function FrontNavbar({ dateStr, timeStr }) {
         <button className="icon-btn" title="แจ้งเตือน">
           <span className="material-symbols-outlined">notifications</span>
         </button>
-        <button className="icon-btn" title="บัญชีผู้ใช้">
+        <button
+          className="icon-btn"
+          title="บัญชีผู้ใช้"
+          onClick={() => navigate("/dashboard")}
+        >
           <span className="material-symbols-outlined">account_circle</span>
         </button>
       </div>

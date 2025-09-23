@@ -137,3 +137,30 @@ export function resetPasswordWithCode(email, code, password) {
   return doFetch("/auth/reset-code", { method: "POST", body: { email, code, password } });
 }
 
+// ---------- User-side ----------
+export async function apiProgramsMine() {
+  return doFetch("/programs/mine", { auth: true });
+}
+export async function apiMeStatus() {
+  return doFetch("/me/status", { auth: true });
+}
+
+// ---------- Admin-side ----------
+export async function apiAdminCreateProgram({ title, category }) {
+  return doFetch("/admin/programs", { method: "POST", auth: true, body: { title, category } });
+}
+export async function apiAdminListPrograms() {
+  return doFetch("/admin/programs", { auth: true });
+}
+export async function apiAdminAssignRole({ userId, programId, role }) {
+  return doFetch("/admin/access", { method: "POST", auth: true, body: { userId, programId, role } });
+}
+export async function apiAdminRemoveRole({ userId, programId, role }) {
+  return doFetch("/admin/access", { method: "DELETE", auth: true, body: { userId, programId, role } });
+}
+export async function apiAdminUsersWithoutProgram() {
+  return doFetch("/admin/users/without-program", { auth: true });
+}
+export async function apiAdminUserProgramRoles() {
+  return doFetch("/admin/user-program-roles", { auth: true });
+}
