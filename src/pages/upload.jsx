@@ -1,13 +1,4 @@
 // src/pages/Upload.jsx
-export default function Upload() {
-  return (
-    <div style={{ maxWidth: 900, margin: "20px auto" }}>
-      <h2>Upload (Demo)</h2>
-      <p>ยังไม่ได้ต่อ API อัปโหลดจริง — หน้านี้เป็น placeholder สำหรับทดสอบการป้องกันด้วย ProtectedRoute</p>
-      <ol>
-        <li>อนาคต: ดึงรายการที่ฉันมีสิทธิ์ แล้วให้เลือก program</li>
-        <li>เลือกไฟล์ → POST /uploads (ต้องเพิ่มฝั่ง backend)</li>
-      </ol>
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import FrontSidebar from "../components/FrontSidebar";
@@ -56,8 +47,8 @@ export default function UploadPage() {
     setUploadSuccess(true);
     setTimeout(() => {
       setUploadSuccess(false);
-      navigate("/programme"); // ไปหน้า Programme หลังอัพโหลดเสร็จ
-    }, 1500); // แสดงข้อความ 1.5 วินาที
+      navigate("/programme");
+    }, 1500);
   };
 
   return (
@@ -70,23 +61,23 @@ export default function UploadPage() {
         <FrontNavbar dateStr={dateStr} timeStr={timeStr} />
         <div className="upload-container" style={{ maxWidth: "none", width: "100%", padding: "40px 32px" }}>
           <h2 className="title" style={{ marginBottom: 40 }}>อัปโหลดรายการ</h2>
+
           {uploadSuccess && (
-            <div
-              style={{
-                background: "#d4edda",
-                color: "#155724",
-                border: "1px solid #c3e6cb",
-                borderRadius: 6,
-                padding: "12px 20px",
-                marginBottom: 20,
-                fontWeight: "bold",
-                fontSize: 16,
-                textAlign: "center"
-              }}
-            >
+            <div style={{
+              background: "#d4edda",
+              color: "#155724",
+              border: "1px solid #c3e6cb",
+              borderRadius: 6,
+              padding: "12px 20px",
+              marginBottom: 20,
+              fontWeight: "bold",
+              fontSize: 16,
+              textAlign: "center"
+            }}>
               อัพโหลดเสร็จสิ้น
             </div>
           )}
+
           <form onSubmit={handleSubmit}>
             <div className="content" style={{ gap: 40 }}>
               {/* ฝั่งซ้าย */}
@@ -170,14 +161,14 @@ export default function UploadPage() {
                       <input
                         type="time"
                         value={startTime}
-                        onChange={e => setStartTime(e.target.value)}
+                        onChange={(e) => setStartTime(e.target.value)}
                         style={{ flex: 1 }}
                       />
                       <span style={{ alignSelf: "center" }}>ถึง</span>
                       <input
                         type="time"
                         value={endTime}
-                        onChange={e => setEndTime(e.target.value)}
+                        onChange={(e) => setEndTime(e.target.value)}
                         style={{ flex: 1 }}
                       />
                     </div>
