@@ -56,14 +56,12 @@ export default function FrontSidebar({ collapsed, open, onToggleCollapse, onClos
           {/* ✅ แสดงเมนูเฉพาะ admin */}
           {user?.role === "admin" && (
             <>
-              <Item to="/admin/users" label="User " icon="group" />
-              <Item to="/admin/programs" label="Upload" icon="upload_file" />
-              
+          <Item to="/admin" label="Admin" icon="admin_panel_settings" />
+          <Item to="/user" label="User" icon="group" />
+          <Item to="/upload" label="Upload" icon="upload_file" />
             </>
           )}
-          <Item to="/user" label="User" icon="group" />
-          <Item to="/admin" label="Admin" icon="admin_panel_settings" />
-          <Item to="/upload" label="Upload" icon="upload_file" />
+        
         </nav>
       </div>
 
