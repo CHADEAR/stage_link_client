@@ -29,7 +29,8 @@ export default function App() {
   }
 
   async function handleRegister({ email, password, username }) {
-    await apiRegister(email.trim(), password, username);
+    // backend ต้องการ full_name
+    await apiRegister({ email: email.trim(), password, full_name: username });
     alert("สมัครสำเร็จ กรุณาเข้าสู่ระบบ");
     navigate("/login", { replace: true });
   }
@@ -72,7 +73,6 @@ export default function App() {
           element={
             <ForgotPasswordPage
               onBackToLogin={() => navigate("/login")}
-              onSubmit={(email) => alert(`Reset link sent to ${email}`)}
             />
           }
         />

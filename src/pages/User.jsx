@@ -1,15 +1,14 @@
-// src/pages/User.jsx  (หรือ UserTable.jsx ตามที่คุณใช้)
+// src/pages/User.jsx
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import "./User.css";
 
 import {
-  apiAdminUserProgramRoles,
-  apiAdminUsersWithoutProgram,
-  apiAdminListPrograms,
-  apiAdminAssignRole,
-  // 👇 ถ้าต้องแก้ชื่อ/อีเมลจริง ให้ทำ API แยก เช่น apiAdminUpdateUser(userId, payload)
+  listUsers as apiAdminListUsers,
+  userAccess as apiAdminUserProgramRoles,
+  listProgrammes as apiAdminListPrograms,
+  setUserAccess as apiAdminAssignRole,
 } from "../services/api";
 
 const ROLE_OPTIONS = [
@@ -37,91 +36,112 @@ export default function UserTable() {
     return () => clearInterval(t);
   }, []);
   const dateStr = now.toLocaleDateString("th-TH", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const timeStr = now.toLocaleTimeString("th-TH", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
   });
 
   // ===== Data from API =====
   const [programs, setPrograms] = useState([]);
-  const [rows, setRows] = useState([]);            // รวม Users×Programs×Roles (ตารางจริงจาก DB)
-  const [orphans, setOrphans] = useState([]);      // users without program
+  const [rows, setRows] = useState([]);       // Users × Programs × Roles
+  const [orphans, setOrphans] = useState([]); // users without program
   const [loading, setLoading] = useState(true);
   const [partialErr, setPartialErr] = useState(false);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
     setPartialErr(false);
-    const results = await Promise.allSettled([
-      apiAdminUserProgramRoles(),     // 0
-      apiAdminUsersWithoutProgram(),  // 1
-      apiAdminListPrograms(),         // 2
-    ]);
+    try {
+      // 1) โหลดรายการโปรแกรม และผู้ใช้
+      const [progList, userList] = await Promise.all([
+        apiAdminListPrograms(),
+        apiAdminListUsers(),
+      ]);
+      setPrograms(Array.isArray(progList) ? progList : []);
 
-    const val = (i) => (results[i].status === "fulfilled" ? results[i].value : null);
-    const t = val(0) || [];
-    const n = val(1) || [];
-    const p = val(2) || [];
+      // 2) ดึง access แบบขนาน ลด N+1 แบบ serial
+      const accessArrays = await Promise.all(
+        (userList || []).map(u => apiAdminUserProgramRoles(u.id).catch(() => []))
+      );
 
-    setRows(Array.isArray(t) ? t : []);
-    setOrphans(Array.isArray(n) ? n : []);
-    setPrograms(Array.isArray(p) ? p : []);
+      // 3) ประกอบ rows และ orphans
+      const tmpRows = [];
+      const tmpOrphans = [];
 
-    setPartialErr(results.some((r) => r.status === "rejected"));
-    setLoading(false);
+      (userList || []).forEach((u, idx) => {
+        const accesses = Array.isArray(accessArrays[idx]) ? accessArrays[idx] : [];
+        if (accesses.length === 0) {
+          tmpOrphans.push({
+            id: u.id,
+            email: u.email,
+            full_name: u.full_name || "",
+            role: u.role,
+            created_at: u.created_at,
+          });
+        } else {
+          // สร้างแถวสำหรับทุก access ของ user
+          accesses.forEach(a => {
+            tmpRows.push({
+              user_id: u.id,
+              email: u.email,
+              name: u.full_name || "",       // ใช้ full_name เป็นชื่อ
+              username: u.full_name || "",
+              program_title: a.title || "",  // จาก join ใน backend เราส่ง title มาด้วย
+              program_role: a.role || "",    // mc|judge|guest|voter
+              status_color: u.is_active ? "green" : "red",
+            });
+          });
+        }
+      });
 
-    results.forEach((r, i) => {
-      if (r.status === "rejected") {
-        const name = ["user-program-roles", "users/without-program", "programs"][i];
-        console.warn(`[UserTable.loadAll] ${name} failed:`, r.reason);
-      }
-    });
+      setRows(tmpRows);
+      setOrphans(tmpOrphans);
+    } catch (e) {
+      console.warn("[UserTable.loadAll] failed:", e);
+      setPartialErr(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
   // ===== Compose list for left table =====
-  // แปลง rows (ที่มีหลายแถวต่อ user) ให้เหลือ “ล่าสุดต่อ user” เพื่อแสดงเป็นลิสต์เดียว
- const latestByUser = useMemo(() => {
-  const m = new Map();
-  for (const r of rows) {
-    if (!m.has(r.user_id)) {
-      m.set(r.user_id, {
-        id: r.user_id,
-        username: r.username || r.name || "",  // เผื่อใช้ต่อ
-        name: r.name || r.username || "",      // ✅ ตอนนี้ r.name = username
-        email: r.email,
-        program: r.program_title,
-        status: r.status_color === "green",
-        role: r.program_role,
-        title: r.program_title,
-        image: "",
-      });
+  // ดึง “ล่าสุดต่อ user” จาก rows (ถ้ามีหลายโปรแกรม เอาโปรแกรมแรกที่พบ)
+  const latestByUser = useMemo(() => {
+    const m = new Map();
+    for (const r of rows) {
+      if (!m.has(r.user_id)) {
+        m.set(r.user_id, {
+          id: r.user_id,
+          username: r.username || r.name || "",
+          name: r.name || r.username || "",
+          email: r.email,
+          program: r.program_title || "-",
+          status: r.status_color === "green",
+          role: r.program_role || "-",
+          title: r.program_title || "-",
+          image: "",
+        });
+      }
     }
-  }
-  return Array.from(m.values());
-}, [rows]);
+    return Array.from(m.values());
+  }, [rows]);
 
   // รวมกับ orphans (คนที่ยังไม่มี program) → ใส่ program = "-"
   const users = useMemo(() => {
     const orphanMapped = orphans.map((u) => ({
-  id: u.id,
-  username: u.username || "",
-  name: u.username || u.full_name || (u.email ? u.email.split("@")[0] : ""),
-  email: u.email,
-  program: "-",
-  status: false,
-  role: "-",
-  title: "-",
-  image: "",
-}));
-
+      id: u.id,
+      username: u.full_name || "",
+      name: u.full_name || (u.email ? u.email.split("@")[0] : ""),
+      email: u.email,
+      program: "-",
+      status: false,
+      role: "-",
+      title: "-",
+      image: "",
+    }));
     return [...latestByUser, ...orphanMapped];
   }, [latestByUser, orphans]);
 
@@ -133,19 +153,20 @@ export default function UserTable() {
 
   const sortedUsers = useMemo(() => {
     const arr = [...filteredUsers];
-    arr.sort((a, b) => (sortOrder === "desc" ? b.id.localeCompare?.(a.id) ?? 0 : a.id.localeCompare?.(b.id) ?? 0));
+    arr.sort((a, b) =>
+      (sortOrder === "desc"
+        ? (b.id?.localeCompare?.(a.id) ?? 0)
+        : (a.id?.localeCompare?.(b.id) ?? 0))
+    );
     return arr;
   }, [filteredUsers, sortOrder]);
 
   // ===== Profile pane bindings =====
   useEffect(() => {
-    if (selectedUser) {
-      setProfileImage(selectedUser.image || "");
-    }
+    if (selectedUser) setProfileImage(selectedUser.image || "");
   }, [selectedUser]);
 
   const handleEditProfile = () => {
-    // ค่าเริ่มต้นของแบบฟอร์ม: ใช้ข้อมูลเดิม + program/role จากรายการล่าสุด
     setEditData({
       id: selectedUser.id,
       name: selectedUser.name,
@@ -172,23 +193,20 @@ export default function UserTable() {
       if (!editData?.programId) return alert("กรุณาเลือก Program");
       if (!editData?.role) return alert("กรุณาเลือก Role");
 
-      await apiAdminAssignRole({
-        userId: editData.id,
-        programId: editData.programId,
+      await apiAdminAssignRole(editData.id, {
+        programme_id: editData.programId,
         role: editData.role,
       });
 
-      // อัปเดตข้อมูลใน list ด้านซ้ายแบบง่าย ๆ: reload ทั้งหมด
       await loadAll();
 
-      // ตั้งค่า selectedUser ใหม่ (ให้โชว์ค่าใหม่)
       const progTitle = programs.find((p) => p.id === editData.programId)?.title || "-";
       setSelectedUser((prev) => prev ? {
         ...prev,
         title: progTitle,
         program: progTitle,
         role: editData.role,
-        image: profileImage, // รูปยังเป็นฝั่ง client
+        image: profileImage,
       } : prev);
 
       setEditMode(false);

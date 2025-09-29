@@ -3,77 +3,31 @@ import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import ProgrammeCard from "../components/ProgrammeCard";
 import "./Programme.css";
+import { listProgrammes, programmeUploads } from "../services/api";
 
-const mockItems = [
-  {
-    id: 1,
-    title: "บรรจง ชงข่าว",
-    time: "11.00 น. - 14.00 น.",
-    status: "green",
-    img: "/assets/program-bun.jpg",
-  },
-  {
-    id: 2,
-    title: "มหาศึกบิงศิลป์",
-    time: "18.00 น. - 20.00 น.",
-    status: "green",
-    img: "/assets/program-mu.jpg",
-  },
-  {
-    id: 3,
-    title: "The Celeb Wars",
-    time: "22.15 น. - 23.00 น.",
-    status: "red",
-    img: "/assets/program-celeb.jpg",
-  },
-  {
-    id: 4,
-    title: "เจาะใจ",
-    time: "20.30 น. - 21.30 น.",
-    status: "green",
-    img: "/assets/program-talk.jpg",
-  },
-  {
-    id: 5,
-    title: "ละครเย็น",
-    time: "17.00 น. - 18.00 น.",
-    status: "red",
-    img: "/assets/program-drama.jpg",
-  },
-  {
-    id: 6,
-    title: "ข่าวค่ำ",
-    time: "19.00 น. - 20.00 น.",
-    status: "green",
-    img: "/assets/program-news.jpg",
-  },
-];
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function Programme() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const [selectedDate, setSelectedDate] = useState(new Date()); // วันที่จากปฏิทิน
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const dateInputRef = useRef(null);
 
-  // นาฬิกาปัจจุบัน
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // นาฬิกา
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
 
-  // format ไทย
   const formatThaiDate = (d) =>
     d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const formatThaiTime = (d) =>
-    d.toLocaleTimeString("th-TH", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,   // ให้เป็น 24 ชั่วโมง
-    });
+    d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hour12: false });
 
-  // value สำหรับ <input type="date"> (กัน timezone เพี้ยน)
   const toInputValue = (d) => {
     const tz = d.getTimezoneOffset() * 60 * 1000;
     const local = new Date(d.getTime() - tz);
@@ -87,6 +41,61 @@ export default function Programme() {
     else { el.focus(); el.click(); }
   };
 
+  // โหลดของจริง
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const progs = await listProgrammes();
+
+        const prelim = (progs || []).map((p) => {
+          // แปลงเวลาสวย ๆ
+          let time = "";
+          if (p.shoot_date && p.start_time && p.end_time) {
+            const [y,m,d] = String(p.shoot_date).split("-").map(Number);
+            const dt = new Date(y, m-1, d);
+            const dateTh = dt.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+            const start = `${p.start_time}`.slice(0,5);
+            const end   = `${p.end_time}`.slice(0,5);
+            time = `${dateTh} • ${start} - ${end} น.`;
+          } else if (p.created_at) {
+            time = new Date(p.created_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+          }
+
+          return {
+            id: p.id,
+            title: p.title,
+            status: p.is_active ? "green" : "red",
+            time,
+            imageUrl: p.cover_image
+              ? (String(p.cover_image).startsWith("http") ? p.cover_image : `${API_BASE}${p.cover_image}`)
+              : null,
+          };
+        });
+
+        const need = prelim.filter((i) => !i.imageUrl);
+        if (need.length) {
+          const uploadsList = await Promise.all(
+            need.map((i) => programmeUploads(i.id).catch(() => []))
+          );
+          need.forEach((item, idx) => {
+            const list = uploadsList[idx];
+            if (Array.isArray(list) && list.length > 0) {
+              const url = list[0].url;
+              item.imageUrl = String(url).startsWith("http") ? url : `${API_BASE}${url}`;
+            }
+          });
+        }
+
+        setItems(prelim);
+      } catch (e) {
+        console.error("[Programme] load error:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   return (
     <div className={["front-shell", sidebarCollapsed ? "side-collapsed" : "", menuOpen ? "mobile-open" : ""].join(" ")}>
       <FrontSidebar
@@ -94,13 +103,11 @@ export default function Programme() {
         open={menuOpen}
         onToggleCollapse={() => setSidebarCollapsed(v => !v)}
         onCloseMobile={() => setMenuOpen(false)}
-        // ⬇️ ส่งวันที่ที่ “เลือกจากปฏิทิน” ไปให้ Sidebar
         selectedDateLabel={formatThaiDate(selectedDate)}
       />
 
       <div className="front-main">
         <FrontNavbar
-          // ⬇️ Navbar ใช้ “เวลาปัจจุบัน”
           dateStr={formatThaiDate(now)}
           timeStr={formatThaiTime(now)}
           onToggleMenu={() => setMenuOpen(v => !v)}
@@ -137,10 +144,22 @@ export default function Programme() {
             </div>
           </div>
 
-
-          <div className="card-grid">
-            {mockItems.map(it => (<ProgrammeCard key={it.id} {...it} />))}
-          </div>
+          {loading ? (
+            <div style={{ padding: 24 }}>กำลังโหลดรายการ…</div>
+          ) : (
+            <div className="card-grid">
+              {items.map((it) => (
+                <ProgrammeCard
+                  key={it.id}
+                  title={it.title}
+                  time={it.time}
+                  status={it.status}
+                  imageUrl={it.imageUrl}
+                />
+              ))}
+              {!items.length && <div style={{ padding: 24, color: "#666" }}>— ยังไม่มีรายการ —</div>}
+            </div>
+          )}
         </div>
       </div>
 
