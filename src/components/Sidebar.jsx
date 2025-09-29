@@ -1,7 +1,7 @@
 import React from "react";
 import { logout, setAccessToken } from "../services/api";
 import { Link, useLocation } from "react-router-dom";
-import "./FrontSidebar.css";
+import "./Sidebar.css";
 import stageLogo from "../assets/Stage.png";
 import useAuth from "../hooks/useAuth";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import "./FrontNavbar.css";
+import "./Topbar.css";
 import { useNavigate } from "react-router-dom";
 
 export default function FrontNavbar({ dateStr, timeStr }) {

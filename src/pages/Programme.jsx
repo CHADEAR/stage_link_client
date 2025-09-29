@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import FrontSidebar from "../components/FrontSidebar";
-import FrontNavbar from "../components/FrontNavbar";
+import FrontSidebar from "../components/Sidebar";
+import FrontNavbar from "../components/Topbar";
 import ProgrammeCard from "../components/ProgrammeCard";
 import "./Programme.css";
 

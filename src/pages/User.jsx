@@ -1,7 +1,7 @@
 // src/pages/User.jsx  (หรือ UserTable.jsx ตามที่คุณใช้)
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import FrontSidebar from "../components/FrontSidebar";
-import FrontNavbar from "../components/FrontNavbar";
+import FrontSidebar from "../components/Sidebar";
+import FrontNavbar from "../components/Topbar";
 import "./User.css";
 
 import {

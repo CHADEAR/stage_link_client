@@ -1,8 +1,8 @@
 // src/pages/Upload.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import FrontSidebar from "../components/FrontSidebar";
-import FrontNavbar from "../components/FrontNavbar";
+import FrontSidebar from "../components/Sidebar";
+import FrontNavbar from "../components/Topbar";
 import "./Upload.css";
 
 export default function UploadPage() {
