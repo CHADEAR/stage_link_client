@@ -21,6 +21,7 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // handlers สำหรับส่งเข้า Login / Register pages
   async function handleLogin({ email, password }) {
     await apiLogin(email.trim(), password);
     const from = location.state?.from?.pathname || "/";
@@ -36,12 +37,14 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* ✅ Public routes */}
-        <Route path="/" element={<Programme />} />   
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/user" element={<User />} />
+        {/* เส้นทางที่ต้องล็อกอินก่อน */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Programme />} />   
+          <Route path="/upload" element={<Upload />} />
+          <Route path="/user" element={<User />} />
+        </Route>
 
-        {/* Auth routes */}
+        {/* public routes */}
         <Route
           path="/login"
           element={
@@ -74,8 +77,8 @@ export default function App() {
           }
         />
 
-        {/* 404 Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* not found */}
+        <Route path="*" element={<Navigate to={getAccessToken() ? "/" : "/login"} replace />} />
       </Route>
     </Routes>
   );
