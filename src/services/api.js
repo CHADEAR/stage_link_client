@@ -60,8 +60,13 @@ export async function programmeUploads(programmeId) {
 /** =====================
  * Users (admin)
  * ====================== */
-export async function listUsers(token = getAccessToken()) {
-  return doFetch("/users", { auth: true, token });
+// export async function listUsers(token = getAccessToken()) {
+//   return doFetch("/users", { auth: true, token });
+// }
+
+export async function listUsersByRole(role, token = getAccessToken()) {
+  const qs = role ? `?role=${encodeURIComponent(role)}` : "";
+  return doFetch(`/users${qs}`, { auth: true, token });
 }
 export async function userAccess(userId, token = getAccessToken()) {
   return doFetch(`/users/${userId}/access`, { auth: true, token });

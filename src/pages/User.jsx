@@ -5,7 +5,7 @@ import FrontNavbar from "../components/Topbar";
 import "./User.css";
 
 import {
-  listUsers as apiAdminListUsers,
+  listUsersByRole as apiAdminListUsers,
   userAccess as apiAdminUserProgramRoles,
   listProgrammes as apiAdminListPrograms,
   setUserAccess as apiAdminAssignRole,
@@ -56,7 +56,7 @@ export default function UserTable() {
       // 1) โหลดรายการโปรแกรม และผู้ใช้
       const [progList, userList] = await Promise.all([
         apiAdminListPrograms(),
-        apiAdminListUsers(),
+        apiAdminListUsers('user'),
       ]);
       setPrograms(Array.isArray(progList) ? progList : []);
 
