@@ -28,8 +28,9 @@ function SignUpPage({ onSwitchToLogin }) {
 
   return (
     <div className="signup-container">
-      <div className="signup-logo">
+      <div className="login-logo">
         <img src={logo} alt="StageLink" />
+        <p className="login-logo-text">StageLink</p>
       </div>
       <form className="signup-form" onSubmit={handleSubmit}>
         <h2>Create an account</h2>

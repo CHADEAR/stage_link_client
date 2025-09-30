@@ -68,8 +68,9 @@ export default function ResetPasswordFlow({ onBackToLogin }) {
 
   return (
     <div className="otp-wrapper">
-      <div className="otp-logo">
+      <div className="login-logo">
         <img src={logo} alt="StageLink" />
+        <p className="login-logo-text">StageLink</p>
       </div>
 
       {step === "email" && (

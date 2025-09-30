@@ -77,6 +77,11 @@ html, body {
   transition: opacity 0.2s;
   margin-top: 10px;
 }
+
+.signup-form button:hover {
+  background: #003366;   
+}
+
 .signup-form button:hover:not(:disabled) {
   opacity: 0.85;
 }

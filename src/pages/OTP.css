@@ -98,6 +98,11 @@ html, body {
   margin-top: 8px;
   transition: opacity 0.2s;
 }
+
+.otp-btn:hover {
+  background: #003366;   
+}
+
 .otp-btn:hover:not(:disabled) {
   opacity: 0.9;
 }
@@ -109,11 +114,14 @@ html, body {
 .otp-link {
   background: none;
   border: none;
-  color: #007bff;
+  color: #419dff;
   cursor: pointer;
   text-decoration: underline;
   font-size: 14px;
   margin-top: 12px;
+}
+.otp-link:hover{
+  color: #65f999;
 }
 
 /* messages */
