@@ -47,8 +47,19 @@ export async function reset(email, otp, newPassword) {
 /** =====================
  * Programmes
  * ====================== */
-export async function listProgrammes() {
-  return doFetch("/programmes");
+export async function listProgrammes(params) {
+  const qs = new URLSearchParams();
+  if (params?.date) qs.set("date", params.date);                         // YYYY-MM-DD
+  if (params?.date_from) qs.set("date_from", params.date_from);
+  if (params?.date_to) qs.set("date_to", params.date_to);
+  if (Array.isArray(params?.categories)) {
+    // ส่งแบบ multi-key: ?categories=news&categories=variety
+    for (const c of params.categories) qs.append("categories", c);
+  } else if (typeof params?.categories === "string") {
+    qs.set("categories", params.categories);
+  }
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return doFetch(`/programmes${suffix}`);
 }
 export async function createProgramme(payload, token = getAccessToken()) {
   return doFetch("/programmes", { method: "POST", body: payload, auth: true, token });
