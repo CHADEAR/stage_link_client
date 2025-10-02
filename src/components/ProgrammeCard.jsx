@@ -1,25 +1,20 @@
+// src/components/ProgrammeCard.jsx
 import React from "react";
 import "./ProgrammeCard.css";
-import Fallback from "../assets/news.jpg"; // รูปสำรองเมื่อโหลดรูปจริงไม่สำเร็จ
+import Fallback from "../assets/news.jpg";
 
 function StatusDot({ status = "green" }) {
   return <span className={`status-dot ${status}`} />;
 }
 
-export default function ProgrammeCard({ title, time, status, imageUrl, children, onDetailClick }) {
+/** onOpen: ฟังก์ชันที่ถูกเรียกเมื่อกดปุ่มรายละเอียด */
+export default function ProgrammeCard({ title, time, status, imageUrl, onOpen, children }) {
+  const onImgError = (e) => { e.currentTarget.src = Fallback; };
+
   return (
     <div className="prog-card">
       <div className="thumb">
-        <img
-          src={imageUrl || Fallback}
-          alt={title}
-          loading="lazy"
-          decoding="async"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = Fallback;
-          }}
-        />
+        <img src={imageUrl || Fallback} alt={title} onError={onImgError} loading="lazy" />
       </div>
 
       <div className="prog-body">
@@ -32,13 +27,9 @@ export default function ProgrammeCard({ title, time, status, imageUrl, children,
         </div>
 
         <div className="action-row">
-          {/* ✅ กรณีส่ง children เข้ามา */}
-          {children}
-
-          {/* ✅ หรือใช้ prop onDetailClick */}
-          {onDetailClick && (
-            <button className="detail-btn" onClick={onDetailClick}>
-              รายละเอียดการจัดการ
+          {children ?? (
+            <button className="detail-btn" onClick={onOpen}>
+              รายละเอียดการจัดรายการ
             </button>
           )}
         </div>

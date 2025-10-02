@@ -1,5 +1,6 @@
+// src/pages/Programme.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";   // ⭐ เพิ่ม
+import { useNavigate } from "react-router-dom";
 import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import ProgrammeCard from "../components/ProgrammeCard";
@@ -8,7 +9,7 @@ import { listProgrammes, programmeUploads } from "../services/api";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-/** 🔧 แปลงค่าจาก DB/API ให้เป็น URL เต็ม */
+/* ---------------- Utils ---------------- */
 const toAbsUrl = (raw) => {
   if (!raw) return null;
   const s = String(raw);
@@ -17,6 +18,44 @@ const toAbsUrl = (raw) => {
   return `${API_BASE}/uploads/${s.replace(/^\/+/, "")}`;
 };
 
+const SAVE_DATA = typeof navigator !== "undefined" && navigator.connection?.saveData;
+const CACHE_TTL_MS = 2 * 60 * 1000; // 2 นาที
+const CACHE_KEY_LIST = "prog:list:v1";
+const CACHE_KEY_UPLOADS = "prog:uploads:v1"; // { [programmeId]: url }
+
+/** cache helpers */
+const now = () => Date.now();
+const readCache = (key) => {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    if (parsed.exp && parsed.exp < now()) return null;
+    return parsed.data ?? null;
+  } catch { return null; }
+};
+const writeCache = (key, data, ttl = CACHE_TTL_MS) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ exp: now() + ttl, data }));
+  } catch { /* ignore */ }
+};
+
+/** mapLimit: run mapper concurrently up to `limit` */
+async function mapLimit(arr, limit, mapper) {
+  const ret = new Array(arr.length);
+  let i = 0;
+  const workers = new Array(Math.min(limit, arr.length)).fill(0).map(async () => {
+    while (i < arr.length) {
+      const cur = i++;
+      ret[cur] = await mapper(arr[cur], cur);
+    }
+  });
+  await Promise.all(workers);
+  return ret;
+}
+
+/* ---------------- Page ---------------- */
 export default function Programme() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,16 +63,14 @@ export default function Programme() {
   const dateInputRef = useRef(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();   // ⭐ เพิ่ม
+  const navigate = useNavigate();
 
   // นาฬิกา
-  const [now, setNow] = useState(new Date());
+  const [nowTime, setNowTime] = useState(new Date());
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 1000);
+    const t = setInterval(() => setNowTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-
   const formatThaiDate = (d) =>
     d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const formatThaiTime = (d) =>
@@ -44,7 +81,6 @@ export default function Programme() {
     const local = new Date(d.getTime() - tz);
     return local.toISOString().slice(0, 10);
   };
-
   const openDatePicker = () => {
     const el = dateInputRef.current;
     if (!el) return;
@@ -52,13 +88,21 @@ export default function Programme() {
     else { el.focus(); el.click(); }
   };
 
-  // ✅ โหลดข้อมูล
+  // ✅ โหลดข้อมูล (มีแคช + ดึงรูปแบบจำกัด concurrency)
   useEffect(() => {
-    let canceled = false;
+    let cancelled = false;
+
     (async () => {
       try {
         setLoading(true);
-        const progs = await listProgrammes();
+
+        // 1) อ่านรายการจากแคชก่อน (ถ้ามี) — ให้ผู้ใช้เห็นการ์ดเร็วขึ้น
+        const cachedList = readCache(CACHE_KEY_LIST);
+        if (!cancelled && Array.isArray(cachedList)) setItems(cachedList);
+
+        // 2) โหลดรายการจริงจาก API (ทับแคชถ้ามี)
+        const progs = await listProgrammes().catch(() => cachedList || []);
+        if (cancelled) return;
 
         const prelim = (progs || []).map((p) => {
           let time = "";
@@ -86,41 +130,64 @@ export default function Programme() {
           };
         });
 
-        if (canceled) return;
+        if (cancelled) return;
         setItems(prelim);
+        writeCache(CACHE_KEY_LIST, prelim); // แคชรายการ
 
-        // lazy load images
-        const need = prelim.filter((i) => !i.imageUrl);
+        // 3) เติมรูปจากอัปโหลด (ถ้า card ไหนยังไม่มีรูป) — ใช้แคชอัปโหลดช่วย
+        const uploadCache = readCache(CACHE_KEY_UPLOADS) || {};
+        const filledFromCache = new Map();
+
+        const patched = prelim.map((it) => {
+          if (!it.imageUrl && uploadCache[it.id]) {
+            filledFromCache.set(it.id, true);
+            return { ...it, imageUrl: uploadCache[it.id] };
+          }
+          return it;
+        });
+
+        if (!cancelled) setItems(patched);
+
+        // 4) เตรียมยิง API หา uploads เฉพาะที่ยังไม่มีรูป (และยังไม่ได้ในแคช)
+        let need = patched.filter((i) => !i.imageUrl).map((i) => i.id);
+
+        // เคารพ Save-Data: ถ้าผู้ใช้เปิดโหมดประหยัดดาต้า โหลดรูปเสริมแค่ไม่กี่รายการพอ
+        const MAX_EAGER_UPLOADS = SAVE_DATA ? 4 : 12;
+        if (need.length > MAX_EAGER_UPLOADS) need = need.slice(0, MAX_EAGER_UPLOADS);
+
         if (need.length) {
-          const uploadsList = await Promise.all(
-            need.map((i) => programmeUploads(i.id).catch(() => []))
-          );
-          if (canceled) return;
-
-          const patchMap = new Map();
-          need.forEach((item, idx) => {
-            const list = uploadsList[idx];
-            if (Array.isArray(list) && list.length > 0) {
-              const first = list[0];
-              const raw = first?.url || first?.file_path || null;
-              const abs = toAbsUrl(raw);
-              if (abs) patchMap.set(item.id, abs);
+          // จำกัด concurrency = 4 เพื่อไม่ถล่มเซิร์ฟเวอร์
+          const results = await mapLimit(need, 4, async (progId) => {
+            try {
+              const list = await programmeUploads(progId);
+              const first = Array.isArray(list) && list.length ? (list[0].url || list[0].file_path) : null;
+              const abs = toAbsUrl(first);
+              return { progId, abs };
+            } catch {
+              return { progId, abs: null };
             }
           });
 
-          if (patchMap.size > 0) {
-            setItems((prev) =>
-              prev.map((it) => (patchMap.has(it.id) ? { ...it, imageUrl: patchMap.get(it.id) } : it))
-            );
+          if (cancelled) return;
+
+          const patchMap = {};
+          results.forEach(({ progId, abs }) => { if (abs) patchMap[progId] = abs; });
+
+          if (Object.keys(patchMap).length) {
+            // อัปเดตสถานะ + แคชอัปโหลด
+            const next = (prev) => prev.map((it) => patchMap[it.id] ? ({ ...it, imageUrl: patchMap[it.id] }) : it);
+            setItems(next);
+            writeCache(CACHE_KEY_UPLOADS, { ...uploadCache, ...patchMap });
           }
         }
       } catch (e) {
         console.error("[Programme] load error:", e);
       } finally {
-        if (!canceled) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => { canceled = true; };
+
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -135,8 +202,8 @@ export default function Programme() {
 
       <div className="front-main">
         <FrontNavbar
-          dateStr={formatThaiDate(now)}
-          timeStr={formatThaiTime(now)}
+          dateStr={formatThaiDate(nowTime)}
+          timeStr={formatThaiTime(nowTime)}
           onToggleMenu={() => setMenuOpen(v => !v)}
         />
 
@@ -184,7 +251,7 @@ export default function Programme() {
                   imageUrl={it.imageUrl}
                 >
                   <button
-                    onClick={() => navigate(`/programme/${it.id}`,{state: { programme: it }})}
+                    onClick={() => navigate(`/programme/${it.id}`, { state: { programme: it } })}
                     className="icon-btn"
                   >
                     รายละเอียดการจัดการ
