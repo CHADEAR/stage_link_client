@@ -1,4 +1,4 @@
-// src/pages/Vote1.jsx
+// src/pages/Voter.jsx
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, RotateCcw } from "lucide-react";
@@ -6,13 +6,13 @@ import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import "./Voter.css";
 
+// ใช้ตัวแปร env เดิมของคุณได้เลย (ตั้งใน frontend/.env)
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 const API_VOTE = `${BASE_URL}/api/vote`;
 const API_CTRL = `${BASE_URL}/api/control`;
 
-export default function Vote1() {
+export default function Voter() {
   const navigate = useNavigate();
-
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // ----- time on navbar -----
@@ -45,63 +45,41 @@ export default function Vote1() {
   );
 
   // ----- state -----
-  const [rows, setRows] = useState([]);
+  const [rows, setRows] = useState([]);     // [{player, value}]
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-
-  // keep reference of active polling to cancel
   const pollTimerRef = useRef(null);
 
-  const fetchWithAbort = async (url, options = {}, controller) => {
-    const r = await fetch(url, { ...options, signal: controller.signal });
+  const fetchJSON = async (url, options = {}) => {
+    const r = await fetch(url, options);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   };
 
-  const loadVotes = async (controller) => {
+  // โหลด snapshot (ใช้งานกับการ์ดบน)
+  const loadVotes = async () => {
     try {
-      const data = await fetchWithAbort(`${API_VOTE}/current`, {}, controller);
-      if (Array.isArray(data?.rows)) setRows(data.rows);
+      const data = await fetchJSON(`${API_VOTE}/snapshot`);
+      // data = { ok:true, items:[{player,value,updated_at}], current }
+      if (Array.isArray(data?.items)) setRows(data.items);
       setErr("");
     } catch (e) {
-      if (e.name !== "AbortError") {
-        console.error(e);
-        setErr("เชื่อมต่อ API ไม่ได้");
-      }
+      console.error(e);
+      setErr("เชื่อมต่อ API ไม่ได้");
     }
   };
 
-  // polling: หยุดเมื่อแท็บไม่ active
+  // polling ทุก 1.5s (เฉพาะตอนแท็บ active)
   useEffect(() => {
-    const controller = new AbortController();
-
-    const startPolling = () => {
-      // เรียกครั้งแรกทันที
-      loadVotes(controller);
-      // ตั้ง interval
-      pollTimerRef.current = setInterval(() => {
-        // ถ้าแท็บไม่ active ให้ข้าม
-        if (document.visibilityState !== "visible") return;
-        const c = new AbortController();
-        loadVotes(c);
-      }, 1500);
-    };
-
-    const stopPolling = () => {
-      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      controller.abort();
-    };
-
-    startPolling();
-    document.addEventListener("visibilitychange", () => {
-      // เมื่อกลับมา active ก็ปล่อยให้รอบต่อไปดึงเอง
-    });
-
-    return () => {
-      stopPolling();
-    };
+    loadVotes(); // ครั้งแรก
+    pollTimerRef.current = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      loadVotes();
+    }, 1500);
+    return () => clearInterval(pollTimerRef.current);
   }, []);
 
+  // map player -> value (1=เลือก/ไฟติด, 0=รอ/ไฟดับ)
   const valueMap = useMemo(() => {
     const m = new Map();
     rows.forEach((r) => m.set(r.player, Number(r.value)));
@@ -116,33 +94,33 @@ export default function Vote1() {
     minute: "2-digit",
   });
 
-  // === actions ===
+  // ===== actions =====
   const postJson = async (url, body) => {
     setLoading(true);
-    const controller = new AbortController();
     try {
-      const r = await fetch(url, {
+      await fetchJSON(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-        signal: controller.signal,
       });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      // refresh หลังสั่งสำเร็จ
-      await loadVotes(new AbortController());
+      // ให้ความรู้สึกไวขึ้น: refresh หลังส่งคำสั่งเล็กน้อย
+      setTimeout(loadVotes, 400);
       setErr("");
     } catch (e) {
-      if (e.name !== "AbortError") {
-        console.error(e);
-        setErr("ส่งคำสั่งไม่สำเร็จ");
-      }
+      console.error(e);
+      setErr("ส่งคำสั่งไม่สำเร็จ");
     } finally {
       setLoading(false);
     }
   };
 
-  const onSpinOnly = (player) => postJson(`${API_CTRL}/spin-only`, { player });
-  const onVoteAndSpin = (player) => postJson(`${API_CTRL}/vote`, { player });
+  // ล่างซ้าย: หมุน + ไฟสว่าง  (light:true)
+  const onRotateWithLight = (player) =>
+    postJson(`${API_CTRL}/enqueue`, { player, light: true });
+
+  // ล่างขวา: หมุน + ไฟดับ    (light:false)
+  const onRotateNoLight = (player) =>
+    postJson(`${API_CTRL}/enqueue`, { player, light: false });
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f7fa" }}>
@@ -166,7 +144,7 @@ export default function Vote1() {
           <span className="vote-datetime">{fmt}</span>
         </div>
 
-        {/* แผงผลโหวตปัจจุบัน */}
+        {/* การ์ดบน: แสดงผลการเลือกของกรรมการ */}
         <section className="vote-card">
           <div className="section-title">
             แสดงผลการเลือกของกรรมการ <strong>The Voice</strong>
@@ -179,9 +157,7 @@ export default function Vote1() {
               return (
                 <div key={p.key} className={`candidate ${active ? "active" : ""}`}>
                   <div className="cand-ring">
-                    <div className="avatar">
-                      <User size={28} />
-                    </div>
+                    <div className="avatar"><User size={28} /></div>
                     <div className="cand-name">{p.label}</div>
                     <span className={`status-pill ${active ? "on" : ""}`}>
                       {active ? "กำลังเลือก" : "รอการเลือก"}
@@ -194,61 +170,53 @@ export default function Vote1() {
 
           <div className="vote-footer">
             <button className="link-back" onClick={() => navigate(-1)}>&lt; Back</button>
-            <button className="btn-refresh" onClick={() => loadVotes(new AbortController())} disabled={loading}>
+            <button className="btn-refresh" onClick={loadVotes} disabled={loading}>
               <RotateCcw size={16} /> {loading ? "Loading..." : "Refresh"}
             </button>
           </div>
         </section>
 
-        {/* แผงล่างซ้าย: หมุนอย่างเดียว (ไม่ถือเป็นโหวต) */}
+        {/* ล่างซ้าย: หมุน + ไฟสว่าง */}
         <section className="vote-card soft">
-          <div className="section-title">
-            ควบคุม การหมุนโดย <strong>ไม่นับเป็นโหวต</strong>
-          </div>
+          <div className="section-title">ควบคุม การหมุนโดย <strong>ไฟจะสว่าง</strong></div>
           <div className="candidate-row">
             {players.map((p) => (
               <button
-                key={`spin-${p.key}`}
+                key={`on-${p.key}`}
                 className="candidate btn"
                 disabled={loading}
-                onClick={() => onSpinOnly(p.key)}
-                title="หมุนอย่างเดียว ไฟไม่ติด ไม่บันทึกโหวต"
+                onClick={() => onRotateWithLight(p.key)}
+                title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟสว่าง`}
               >
                 <div className="cand-ring">
-                  <div className="avatar">
-                    <User size={24} />
-                  </div>
+                  <div className="avatar"><User size={24} /></div>
                   <div className="cand-name">{p.label}</div>
-                  <span className="status-pill">หมุน</span>
+                  <span className="status-pill on">หมุน + ไฟสว่าง</span>
                 </div>
               </button>
             ))}
           </div>
           <div className="vote-footer right">
-            <span className="hint">สั่งหมุน → ESP32 จะรับคิวใน ~0.2s</span>
+            <span className="hint">ESP32 จะรับคิวภายใน ~0.2s</span>
           </div>
         </section>
 
-        {/* แผงล่างขวา: โหวต + หมุน (ไฟติด) */}
+        {/* ล่างขวา: หมุน + ไฟดับ */}
         <section className="vote-card soft">
-          <div className="section-title">
-            ควบคุม การหมุนโดย <strong>โหวตไปด้วย</strong>
-          </div>
+          <div className="section-title">ควบคุม การหมุนโดย <strong>ไฟจะไม่สว่าง</strong></div>
           <div className="candidate-row">
             {players.map((p) => (
               <button
-                key={`vote-${p.key}`}
+                key={`off-${p.key}`}
                 className="candidate btn"
                 disabled={loading}
-                onClick={() => onVoteAndSpin(p.key)}
-                title="โหวต + สั่งหมุน ไฟจะติด"
+                onClick={() => onRotateNoLight(p.key)}
+                title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟดับ`}
               >
                 <div className="cand-ring">
-                  <div className="avatar">
-                    <User size={24} />
-                  </div>
+                  <div className="avatar"><User size={24} /></div>
                   <div className="cand-name">{p.label}</div>
-                  <span className="status-pill on">โหวต + หมุน</span>
+                  <span className="status-pill">หมุน + ไฟดับ</span>
                 </div>
               </button>
             ))}

@@ -157,7 +157,7 @@
   color: #222;
   font-size: 13.5px;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px 10px;                                                        
   border-radius: 8px;
 }
 .link-back:hover, .btn-refresh:hover { background: #f3f4f6; }
