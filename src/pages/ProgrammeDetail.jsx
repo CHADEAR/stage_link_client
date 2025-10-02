@@ -19,12 +19,13 @@ const toAbsUrl = (raw) => {
 export default function ProgrammeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state } = useLocation();            // ← รับ object จาก list
+  const { state } = useLocation();
   const passed = state?.programme || state?.item || null;
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // ถ้ามี state ก็ใช้เป็นค่าเริ่มต้นไปก่อน (เร็วกว่า)
   const [item, setItem] = useState(passed || null);
   const [imgUrl, setImgUrl] = useState(passed?.imageUrl || null);
   const [loading, setLoading] = useState(!passed);
@@ -35,47 +36,61 @@ export default function ProgrammeDetail() {
   const formatThaiDate = (d) => d.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const formatThaiTime = (d) => d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hour12: false });
 
-  // ถ้าเข้ามาด้วย URL ตรง (ไม่มี state) ก็ fallback ไปอ่านจาก API
+  // ✅ ดึงของจริงจาก API ถ้า state ไม่มี description (หรือเข้า URL ตรง)
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (passed) return; // มีของครบแล้ว
       try {
-        setLoading(true);
-        const list = await listProgrammes();
-        const p = list.find((x) => x.id === id) || null;
-        if (cancelled) return;
-        setItem(p);
+        // กรณี state พอครบแล้ว (มี description) ข้ามการ fetch รายการ
+        const needFetchProgramme = !passed || !passed.description;
 
-        let url = toAbsUrl(p?.cover_image);
-        if (!url) {
-          const ups = await programmeUploads(id).catch(() => []);
+        if (needFetchProgramme) {
+          setLoading(true);
+          const list = await listProgrammes();
+          const p = list.find((x) => x.id === id) || null;
           if (cancelled) return;
-          if (Array.isArray(ups) && ups.length) {
-            const raw = ups[0].url || ups[0].file_path;
-            url = toAbsUrl(raw);
+          setItem(p);
+          // เซ็ตรูปจาก cover_image ก่อน
+          let url = toAbsUrl(p?.cover_image);
+          // ถ้ายังไม่มี ค่อยลองไปดู uploads
+          if (!url) {
+            const ups = await programmeUploads(id).catch(() => []);
+            if (cancelled) return;
+            if (Array.isArray(ups) && ups.length) {
+              const raw = ups[0].url || ups[0].file_path;
+              url = toAbsUrl(raw);
+            }
+          }
+          setImgUrl(url || null);
+        } else {
+          // state มีครบแล้ว แต่อาจยังไม่มีรูป → เติมรูปถ้าจำเป็น
+          if (!imgUrl) {
+            let url = toAbsUrl(passed?.cover_image);
+            if (!url) {
+              const ups = await programmeUploads(id).catch(() => []);
+              if (cancelled) return;
+              if (Array.isArray(ups) && ups.length) {
+                const raw = ups[0].url || ups[0].file_path;
+                url = toAbsUrl(raw);
+              }
+            }
+            setImgUrl(url || null);
           }
         }
-        setImgUrl(url || null);
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [id, passed]);
+  }, [id, passed, imgUrl]);
 
-  // แปลงเวลาโชว์
+  // ✅ เวลา: โชว์เฉพาะช่วงเวลา (เก็บวัน-เดือน-ปีไว้ใน DB เหมือนเดิม)
   const timeLabel = (() => {
     const p = item;
     if (!p) return "";
-    if (p.shoot_date && p.start_time && p.end_time) {
-      const [y, m, d] = String(p.shoot_date).split("-").map(Number);
-      const dt = new Date(y, m - 1, d);
-      const dateTh = dt.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-      const s = `${p.start_time}`.slice(0, 5);
-      const e = `${p.end_time}`.slice(0, 5);
-      return `${dateTh} • ${s}-${e} น.`;
-    }
+    const s = p.start_time ? String(p.start_time).slice(0, 5) : null;
+    const e = p.end_time ? String(p.end_time).slice(0, 5) : null;
+    if (s && e) return `${s} - ${e} น.`;
     return p.created_at
       ? new Date(p.created_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })
       : "";
@@ -84,10 +99,7 @@ export default function ProgrammeDetail() {
   const onImgError = (e) => { e.currentTarget.src = Fallback; };
 
   const handleVote = () => {
-    // ส่งต่อข้อมูล id ของโปรแกรมไปหน้า /voter
     navigate("/voter", { state: { programmeId: id, from: "programme-detail" } });
-    // ถ้าอยากให้เปิดโดยมี query ก็สามารถใช้:
-    // navigate(`/voter?programme=${id}`);
   };
 
   return (
@@ -140,6 +152,7 @@ export default function ProgrammeDetail() {
 
                 <div className="programme-right">
                   <h2>รายละเอียดการถ่ายทำ / การดำเนินการของรายการ</h2>
+                  {/* ✅ ดึง “ของจริง” จาก field description */}
                   <pre style={{ whiteSpace: "pre-wrap" }}>{item?.description || "-"}</pre>
                 </div>
               </div>

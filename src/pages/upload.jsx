@@ -18,17 +18,17 @@ export default function UploadPage() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
-  // ฟิลด์ฟอร์ม (ผูกกับ DB ปัจจุบัน)
+  // ฟิลด์ฟอร์ม (ตรงกับคอลัมน์ DB)
   const [title, setTitle] = React.useState("นักร้องข้ามกำแพง");
   const [shootDate, setShootDate] = React.useState(() => {
     const tz = now.getTimezoneOffset() * 60 * 1000;
-    return new Date(now.getTime() - tz).toISOString().slice(0, 10);
+    return new Date(now.getTime() - tz).toISOString().slice(0, 10); // YYYY-MM-DD
   });
-  const [startTime, setStartTime] = React.useState("12:00");
-  const [endTime, setEndTime] = React.useState("15:00");
+  const [startTime, setStartTime] = React.useState("12:00"); // TIME (HH:MM)
+  const [endTime, setEndTime] = React.useState("15:00");     // TIME (HH:MM)
   const [details, setDetails] = React.useState("schedule");
 
-  // ไฟล์ที่จะอัปโหลด (ใช้เป็น “ไฟล์ของรายการ” ตาม program_uploads)
+  // ไฟล์ที่จะอัปโหลด (program_uploads)
   const [file, setFile] = React.useState(null);
   const [previewImage, setPreviewImage] = React.useState(null);
 
@@ -42,7 +42,6 @@ export default function UploadPage() {
   const handleFileChange = (e) => {
     const f = e.target.files?.[0] || null;
     setFile(f);
-    // ถ้าเป็นภาพให้พรีวิว, ถ้าเป็นวิดีโอ/ไฟล์อื่น ไม่พรีวิว (แสดงชื่อไฟล์แทน)
     if (f && f.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = (ev) => setPreviewImage(ev.target.result);
@@ -57,23 +56,39 @@ export default function UploadPage() {
     if (!title.trim()) return alert("กรุณากรอกชื่อรายการ");
     if (!file) return alert("กรุณาเลือกไฟล์ที่จะอัปโหลด");
 
+    // ✅ ตรวจสอบรูปแบบเบื้องต้น
+    const hhmm = /^\d{2}:\d{2}$/;
+    if (!hhmm.test(startTime) || !hhmm.test(endTime)) {
+      return alert("เวลาไม่ถูกต้อง (รูปแบบ HH:MM)");
+    }
+    if (shootDate && !/^\d{4}-\d{2}-\d{2}$/.test(shootDate)) {
+      return alert("วันที่ถ่ายทำไม่ถูกต้อง (รูปแบบ YYYY-MM-DD)");
+    }
+    // (ตัวเลือก) ตรวจว่า end > start
+    const toMin = (t) => {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    };
+    if (toMin(endTime) <= toMin(startTime)) {
+      return alert("เวลาสิ้นสุด ต้องมากกว่าเวลาเริ่มต้น");
+    }
+
     try {
       setSubmitting(true);
 
-      // รวมรายละเอียดที่ไม่มีคอลัมน์ใน DB เข้าไปใน description
-      const description = [
-        details || "",
-        `Shoot: ${shootDate} ${startTime}-${endTime}`
-      ].filter(Boolean).join("\n");
+      const description = (details || "").trim();
 
-      // 1) สร้างรายการในตาราง programmes
+      // ✅ 1) สร้างรายการ พร้อมผูกคอลัมน์เวลา/วันที่จริงลง DB
       const programme = await createProgramme({
         title: title.trim(),
-        description,           // map ลง description
-        // category / cover_image ยังไม่ตั้งในฟอร์มนี้
+        description,
+        shoot_date: shootDate,   // ✅ map -> programmes.shoot_date (DATE)
+        start_time: startTime,   // ✅ map -> programmes.start_time (TIME)
+        end_time: endTime,       // ✅ map -> programmes.end_time (TIME)
+        // category / cover_image ยังไม่ใช้ในฟอร์มนี้
       });
 
-      // 2) อัปโหลดไฟล์ผูกกับรายการ (program_uploads)
+      // ✅ 2) อัปโหลดไฟล์ผูกกับรายการ (program_uploads)
       await uploadProgrammeFile({
         programme_id: programme.id,
         file
@@ -147,7 +162,6 @@ export default function UploadPage() {
                     type="file"
                     ref={fileInputRef}
                     style={{ display: "none" }}
-                    // อนุญาตทุกชนิดไฟล์; ถ้าต้องการจำกัดประเภท เปลี่ยน accept ได้ เช่น "image/*,video/*"
                     accept="*/*"
                     onChange={handleFileChange}
                   />

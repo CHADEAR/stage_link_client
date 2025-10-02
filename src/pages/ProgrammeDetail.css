@@ -62,13 +62,14 @@
 }
 
 .programme-right {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
   border: 2px solid #2196f3;
   border-radius: 8px;
   padding: 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 12px;
+  flex: 1;
 }
 
 .programme-right h2 {
