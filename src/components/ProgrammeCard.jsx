@@ -6,7 +6,7 @@ function StatusDot({ status = "green" }) {
   return <span className={`status-dot ${status}`} />;
 }
 
-export default function ProgrammeCard({ title, time, status, imageUrl }) {
+export default function ProgrammeCard({ title, time, status, imageUrl, children, onDetailClick }) {
   return (
     <div className="prog-card">
       <div className="thumb">
@@ -15,8 +15,10 @@ export default function ProgrammeCard({ title, time, status, imageUrl }) {
           alt={title}
           loading="lazy"
           decoding="async"
-          // กันลูป onError (ถ้า fallback ก็พัง จะไม่เรียก onError ซ้ำ)
-          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = Fallback; }}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = Fallback;
+          }}
         />
       </div>
 
@@ -30,7 +32,15 @@ export default function ProgrammeCard({ title, time, status, imageUrl }) {
         </div>
 
         <div className="action-row">
-          <button className="detail-btn">รายละเอียดการจัดรายการ</button>
+          {/* ✅ กรณีส่ง children เข้ามา */}
+          {children}
+
+          {/* ✅ หรือใช้ prop onDetailClick */}
+          {onDetailClick && (
+            <button className="detail-btn" onClick={onDetailClick}>
+              รายละเอียดการจัดการ
+            </button>
+          )}
         </div>
       </div>
     </div>

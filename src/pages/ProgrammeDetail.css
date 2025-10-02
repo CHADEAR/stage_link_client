@@ -1,0 +1,78 @@
+.programme-detail-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.programme-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  background: #e6e8ee;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.programme-detail-body {
+  display: flex;
+  gap: 16px;
+}
+
+.programme-left {
+  width: 250px;
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.programme-cover {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.programme-desc {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #222;
+}
+
+.programme-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-btn {
+  background: #e6e8ee;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.detail-btn:hover {
+  background: #d1d5db;
+}
+
+.programme-right {
+  flex: 1;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.programme-right h2 {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}

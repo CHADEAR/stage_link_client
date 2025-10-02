@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";   // ⭐ เพิ่ม
 import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import ProgrammeCard from "../components/ProgrammeCard";
@@ -7,11 +8,7 @@ import { listProgrammes, programmeUploads } from "../services/api";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-/** 🔧 ช่วยแปลงค่าจาก DB/API ให้เป็น URL เต็ม
- *  - "http..."         -> ใช้ได้เลย
- *  - "/uploads/xxx"    -> ต่อกับ API_BASE
- *  - "xxx.webp"        -> สร้างเป็น `${API_BASE}/uploads/xxx.webp`
- */
+/** 🔧 แปลงค่าจาก DB/API ให้เป็น URL เต็ม */
 const toAbsUrl = (raw) => {
   if (!raw) return null;
   const s = String(raw);
@@ -25,9 +22,10 @@ export default function Programme() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const dateInputRef = useRef(null);
-
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();   // ⭐ เพิ่ม
 
   // นาฬิกา
   const [now, setNow] = useState(new Date());
@@ -54,20 +52,15 @@ export default function Programme() {
     else { el.focus(); el.click(); }
   };
 
-  // ✅ โหลดเร็วขึ้น: แสดงรายการก่อน แล้วค่อยเติมรูปเฉพาะที่ยังไม่มี
+  // ✅ โหลดข้อมูล
   useEffect(() => {
     let canceled = false;
-
     (async () => {
       try {
         setLoading(true);
-
-        // 1) ดึงลิสต์โปรแกรม
         const progs = await listProgrammes();
 
-        // 2) map เป็น model สำหรับแสดงผล + normalize cover_image
         const prelim = (progs || []).map((p) => {
-          // แปลงเวลาให้อ่านง่าย
           let time = "";
           if (p.shoot_date && p.start_time && p.end_time) {
             const [y, m, d] = String(p.shoot_date).split("-").map(Number);
@@ -89,15 +82,14 @@ export default function Programme() {
             title: p.title,
             status: p.is_active ? "green" : "red",
             time,
-            imageUrl: toAbsUrl(p.cover_image), // ✅ ครอบคลุมทุกกรณี
+            imageUrl: toAbsUrl(p.cover_image),
           };
         });
 
         if (canceled) return;
-        // 3) โชว์รายการก่อน (เร็วขึ้น)
         setItems(prelim);
 
-        // 4) เติมรูปแบบ lazy: ยิง /programmes/:id/uploads เฉพาะตัวที่ยังไม่มี imageUrl
+        // lazy load images
         const need = prelim.filter((i) => !i.imageUrl);
         if (need.length) {
           const uploadsList = await Promise.all(
@@ -105,19 +97,17 @@ export default function Programme() {
           );
           if (canceled) return;
 
-          // สร้าง map ของ id -> imageUrl ที่หาเจอ
           const patchMap = new Map();
           need.forEach((item, idx) => {
             const list = uploadsList[idx];
             if (Array.isArray(list) && list.length > 0) {
               const first = list[0];
-              const raw = first?.url || first?.file_path || null; // รองรับทั้ง url/file_path
+              const raw = first?.url || first?.file_path || null;
               const abs = toAbsUrl(raw);
               if (abs) patchMap.set(item.id, abs);
             }
           });
 
-          // อัปเดตรูปเฉพาะที่หาเจอ โดยไม่กระทบตัวอื่น
           if (patchMap.size > 0) {
             setItems((prev) =>
               prev.map((it) => (patchMap.has(it.id) ? { ...it, imageUrl: patchMap.get(it.id) } : it))
@@ -130,7 +120,6 @@ export default function Programme() {
         if (!canceled) setLoading(false);
       }
     })();
-
     return () => { canceled = true; };
   }, []);
 
@@ -193,9 +182,20 @@ export default function Programme() {
                   time={it.time}
                   status={it.status}
                   imageUrl={it.imageUrl}
-                />
+                >
+                  <button
+                    onClick={() => navigate(`/programme/${it.id}`,{state: { programme: it }})}
+                    className="icon-btn"
+                  >
+                    รายละเอียดการจัดการ
+                  </button>
+                </ProgrammeCard>
               ))}
-              {!items.length && <div style={{ padding: 24, color: "#666" }}>— ยังไม่มีรายการ —</div>}
+              {!items.length && (
+                <div style={{ padding: 24, color: "#666" }}>
+                  — ยังไม่มีรายการ —
+                </div>
+              )}
             </div>
           )}
         </div>

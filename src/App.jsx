@@ -10,6 +10,7 @@ import ForgotPasswordPage from "./pages/OTP";
 import Programme from "./pages/Programme";  
 import Upload from "./pages/upload";
 import User from "./pages/User";
+import ProgrammeDetail from "./pages/ProgrammeDetail";
 
 import {
   login as apiLogin,
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/" element={<Programme />} />   
           <Route path="/upload" element={<Upload />} />
           <Route path="/user" element={<User />} />
+          <Route path="/programme/:id" element={<ProgrammeDetail />} />
         </Route>
 
         {/* public routes */}
