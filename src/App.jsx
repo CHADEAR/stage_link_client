@@ -11,6 +11,7 @@ import Programme from "./pages/Programme";
 import Upload from "./pages/upload";
 import User from "./pages/User";
 import ProgrammeDetail from "./pages/ProgrammeDetail";
+import Voter from "./pages/Voter";
 
 import {
   login as apiLogin,
@@ -78,6 +79,8 @@ export default function App() {
             />
           }
         />
+
+        <Route path="/voter" element={<Voter />} />
 
         {/* not found */}
         <Route path="*" element={<Navigate to={getAccessToken() ? "/" : "/login"} replace />} />
