@@ -7,6 +7,12 @@ import "./Upload.css";
 
 import { createProgramme, uploadProgrammeFile } from "../services/api";
 
+const CATEGORY_OPTIONS = [
+  { value: "news", label: "ข่าว" },
+  { value: "variety", label: "วาไรตี้" },
+  { value: "singing", label: "รายการร้องเพลง" },
+];
+
 export default function UploadPage() {
   const now = new Date();
   const dateStr = now.toLocaleDateString("th-TH", {
@@ -27,6 +33,9 @@ export default function UploadPage() {
   const [startTime, setStartTime] = React.useState("12:00"); // TIME (HH:MM)
   const [endTime, setEndTime] = React.useState("15:00");     // TIME (HH:MM)
   const [details, setDetails] = React.useState("schedule");
+
+  // ✅ NEW: ผูก select ประเภท (ค่าเริ่มต้นวาไรตี้)
+  const [category, setCategory] = React.useState("variety");
 
   // ไฟล์ที่จะอัปโหลด (program_uploads)
   const [file, setFile] = React.useState(null);
@@ -56,7 +65,6 @@ export default function UploadPage() {
     if (!title.trim()) return alert("กรุณากรอกชื่อรายการ");
     if (!file) return alert("กรุณาเลือกไฟล์ที่จะอัปโหลด");
 
-    // ✅ ตรวจสอบรูปแบบเบื้องต้น
     const hhmm = /^\d{2}:\d{2}$/;
     if (!hhmm.test(startTime) || !hhmm.test(endTime)) {
       return alert("เวลาไม่ถูกต้อง (รูปแบบ HH:MM)");
@@ -64,7 +72,6 @@ export default function UploadPage() {
     if (shootDate && !/^\d{4}-\d{2}-\d{2}$/.test(shootDate)) {
       return alert("วันที่ถ่ายทำไม่ถูกต้อง (รูปแบบ YYYY-MM-DD)");
     }
-    // (ตัวเลือก) ตรวจว่า end > start
     const toMin = (t) => {
       const [h, m] = t.split(":").map(Number);
       return h * 60 + m;
@@ -75,20 +82,18 @@ export default function UploadPage() {
 
     try {
       setSubmitting(true);
-
       const description = (details || "").trim();
 
-      // ✅ 1) สร้างรายการ พร้อมผูกคอลัมน์เวลา/วันที่จริงลง DB
+      // ✅ NEW: ส่ง category ไปที่ backend (map -> programmes.category)
       const programme = await createProgramme({
         title: title.trim(),
         description,
-        shoot_date: shootDate,   // ✅ map -> programmes.shoot_date (DATE)
-        start_time: startTime,   // ✅ map -> programmes.start_time (TIME)
-        end_time: endTime,       // ✅ map -> programmes.end_time (TIME)
-        // category / cover_image ยังไม่ใช้ในฟอร์มนี้
+        shoot_date: shootDate,
+        start_time: startTime,
+        end_time: endTime,
+        category, // 👈 ส่งค่า select
       });
 
-      // ✅ 2) อัปโหลดไฟล์ผูกกับรายการ (program_uploads)
       await uploadProgrammeFile({
         programme_id: programme.id,
         file
@@ -97,7 +102,7 @@ export default function UploadPage() {
       setUploadSuccess(true);
       setTimeout(() => {
         setUploadSuccess(false);
-        navigate("/"); // หรือ "/programme"
+        navigate("/");
       }, 1200);
 
     } catch (err) {
@@ -107,6 +112,7 @@ export default function UploadPage() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f7fa" }}>
@@ -185,6 +191,34 @@ export default function UploadPage() {
                       required
                     />
                     <button className="edit-btn-upload" type="button">✎</button>
+                  </div>
+
+                  {/* ✅ เมนู Select ประเภท */}
+                  <div className="form-group">
+                    <label>ประเภท</label>
+                    <div className="category-options">
+                      <button
+                        type="button"
+                        className={`category-btn ${category === "news" ? "active" : ""}`}
+                        onClick={() => setCategory("news")}
+                      >
+                        ข่าว
+                      </button>
+                      <button
+                        type="button"
+                        className={`category-btn ${category === "variety" ? "active" : ""}`}
+                        onClick={() => setCategory("variety")}
+                      >
+                        วาไรตี้
+                      </button>
+                      <button
+                        type="button"
+                        className={`category-btn ${category === "singing" ? "active" : ""}`}
+                        onClick={() => setCategory("singing")}
+                      >
+                        รายการร้องเพลง
+                      </button>
+                    </div>
                   </div>
                 </div>
 
