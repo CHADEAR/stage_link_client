@@ -6,7 +6,7 @@ import FrontSidebar from "../components/Sidebar";
 import FrontNavbar from "../components/Topbar";
 import "./Voter.css";
 
-// ใช้ตัวแปร env เดิมของคุณได้เลย (ตั้งใน frontend/.env)
+// ใช้ env ของ frontend (.env) เช่น VITE_API_BASE_URL=http://localhost:3000
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 const API_VOTE = `${BASE_URL}/api/vote`;
 const API_CTRL = `${BASE_URL}/api/control`;
@@ -45,22 +45,25 @@ export default function Voter() {
   );
 
   // ----- state -----
-  const [rows, setRows] = useState([]);     // [{player, value}]
+  const [rows, setRows] = useState([]); // [{player, value}]
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const pollTimerRef = useRef(null);
 
+  // สำหรับไฮไลต์ปุ่มของการ์ดล่าง (เลือกได้หลายคน)
+  const [pickedOn, setPickedOn] = useState(() => new Set());   // ฝั่งไฟสว่าง
+  const [pickedOff, setPickedOff] = useState(() => new Set()); // ฝั่งไฟดับ
+
+  // helpers
   const fetchJSON = async (url, options = {}) => {
     const r = await fetch(url, options);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   };
 
-  // โหลด snapshot (ใช้งานกับการ์ดบน)
   const loadVotes = async () => {
     try {
       const data = await fetchJSON(`${API_VOTE}/snapshot`);
-      // data = { ok:true, items:[{player,value,updated_at}], current }
       if (Array.isArray(data?.items)) setRows(data.items);
       setErr("");
     } catch (e) {
@@ -69,9 +72,9 @@ export default function Voter() {
     }
   };
 
-  // polling ทุก 1.5s (เฉพาะตอนแท็บ active)
+  // Poll ทุก 1.5s เฉพาะตอนแท็บ active
   useEffect(() => {
-    loadVotes(); // ครั้งแรก
+    loadVotes();
     pollTimerRef.current = setInterval(() => {
       if (document.visibilityState !== "visible") return;
       loadVotes();
@@ -79,7 +82,7 @@ export default function Voter() {
     return () => clearInterval(pollTimerRef.current);
   }, []);
 
-  // map player -> value (1=เลือก/ไฟติด, 0=รอ/ไฟดับ)
+  // map player -> value
   const valueMap = useMemo(() => {
     const m = new Map();
     rows.forEach((r) => m.set(r.player, Number(r.value)));
@@ -103,8 +106,8 @@ export default function Voter() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      // ให้ความรู้สึกไวขึ้น: refresh หลังส่งคำสั่งเล็กน้อย
-      setTimeout(loadVotes, 400);
+      // โหลดผลใหม่ให้เร็วขึ้น
+      setTimeout(loadVotes, 350);
       setErr("");
     } catch (e) {
       console.error(e);
@@ -114,13 +117,37 @@ export default function Voter() {
     }
   };
 
-  // ล่างซ้าย: หมุน + ไฟสว่าง  (light:true)
-  const onRotateWithLight = (player) =>
-    postJson(`${API_CTRL}/enqueue`, { player, light: true });
+  // กดปุ่มในการ์ดล่างซ้าย: หมุน + ไฟสว่าง
+  const onRotateWithLight = async (player) => {
+    // toggle ไฮไลต์แบบหลายตัวเลือก
+    setPickedOn((prev) => {
+      const next = new Set(prev);
+      next.has(player) ? next.delete(player) : next.add(player);
+      return next;
+    });
+    await postJson(`${API_CTRL}/enqueue`, { player, light: true });
+  };
 
-  // ล่างขวา: หมุน + ไฟดับ    (light:false)
-  const onRotateNoLight = (player) =>
-    postJson(`${API_CTRL}/enqueue`, { player, light: false });
+  // การ์ดล่างขวา: หมุน + ไฟดับ
+  const onRotateNoLight = async (player) => {
+    setPickedOff((prev) => {
+      const next = new Set(prev);
+      next.has(player) ? next.delete(player) : next.add(player);
+      return next;
+    });
+    await postJson(`${API_CTRL}/enqueue`, { player, light: false });
+  };
+
+  // Reset UI เฉพาะการ์ดล่าง
+  const onResetOnUI = () => setPickedOn(new Set());
+  const onResetOffUI = () => setPickedOff(new Set());
+
+  // Refresh (รีเซ็ตฮาร์ดแวร์ + สแนปช็อตให้เป็น 0 ทั้งหมด)
+  const onRefreshResetAll = async () => {
+    await postJson(`${API_CTRL}/reset`, { all: true });
+    setPickedOn(new Set());
+    setPickedOff(new Set());
+  };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f7fa" }}>
@@ -130,6 +157,7 @@ export default function Voter() {
       />
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* เฮดเดอร์ (มีวัน/เวลา) */}
         <FrontNavbar dateStr={dateStr} timeStr={timeStr} />
 
         <div className="vote-topbar-spacer" />
@@ -144,84 +172,96 @@ export default function Voter() {
           <span className="vote-datetime">{fmt}</span>
         </div>
 
-        {/* การ์ดบน: แสดงผลการเลือกของกรรมการ */}
+        {/* การ์ดบน: แสดงผลการเลือก + กรอบน้ำเงิน */}
         <section className="vote-card">
           <div className="section-title">
             แสดงผลการเลือกของกรรมการ <strong>The Voice</strong>
           </div>
           {err && <div className="warn">{err}</div>}
 
-          <div className="candidate-row">
-            {players.map((p) => {
-              const active = valueMap.get(p.key) === 1;
-              return (
-                <div key={p.key} className={`candidate ${active ? "active" : ""}`}>
-                  <div className="cand-ring">
-                    <div className="avatar"><User size={28} /></div>
-                    <div className="cand-name">{p.label}</div>
-                    <span className={`status-pill ${active ? "on" : ""}`}>
-                      {active ? "กำลังเลือก" : "รอการเลือก"}
-                    </span>
+          <div className="blue-box">
+            <div className="candidate-row">
+              {players.map((p) => {
+                const active = valueMap.get(p.key) === 1;
+                return (
+                  <div key={p.key} className={`candidate ${active ? "active" : ""}`}>
+                    <div className="cand-ring">
+                      <div className="avatar"><User size={28} /></div>
+                      <div className="cand-name">{p.label}</div>
+                      <span className={`status-pill ${active ? "on" : ""}`}>
+                        {active ? "กำลังเลือก" : "รอการเลือก"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <div className="vote-footer">
             <button className="link-back" onClick={() => navigate(-1)}>&lt; Back</button>
-            <button className="btn-refresh" onClick={loadVotes} disabled={loading}>
+            <button className="btn-refresh" onClick={onRefreshResetAll} disabled={loading}>
               <RotateCcw size={16} /> {loading ? "Loading..." : "Refresh"}
             </button>
           </div>
         </section>
 
-        {/* ล่างซ้าย: หมุน + ไฟสว่าง */}
-        <section className="vote-card soft">
-          <div className="section-title">ควบคุม การหมุนโดย <strong>ไฟจะสว่าง</strong></div>
-          <div className="candidate-row">
-            {players.map((p) => (
-              <button
-                key={`on-${p.key}`}
-                className="candidate btn"
-                disabled={loading}
-                onClick={() => onRotateWithLight(p.key)}
-                title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟสว่าง`}
-              >
-                <div className="cand-ring">
-                  <div className="avatar"><User size={24} /></div>
-                  <div className="cand-name">{p.label}</div>
-                  <span className="status-pill on">หมุน + ไฟสว่าง</span>
-                </div>
+        {/* การ์ดล่างวางคู่ */}
+        <div className="ctrl-grid">
+          {/* ล่างซ้าย: ไฟจะสว่าง */}
+          <section className="ctrl-card">
+            <div className="ctrl-head">ควบคุม การหมุนโดย <strong>ไฟจะสว่าง</strong></div>
+            <div className="mini-row">
+              {players.map((p) => (
+                <button
+                  key={`on-${p.key}`}
+                  className={`mini ${pickedOn.has(p.key) ? "is-on" : ""}`}
+                  disabled={loading}
+                  onClick={() => onRotateWithLight(p.key)}
+                  title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟสว่าง`}
+                >
+                  <div className="mini-avatar"><User size={22} /></div>
+                  <div className="mini-name">{p.label}</div>
+                </button>
+              ))}
+            </div>
+            <div className="ctrl-foot">
+              <span />
+              <button className="reset" onClick={onResetOnUI} title="Reset">
+                Reset <RotateCcw size={16} />
               </button>
-            ))}
-          </div>
-          <div className="vote-footer right">
-            <span className="hint">ESP32 จะรับคิวภายใน ~0.2s</span>
-          </div>
-        </section>
+            </div>
+          </section>
 
-        {/* ล่างขวา: หมุน + ไฟดับ */}
-        <section className="vote-card soft">
-          <div className="section-title">ควบคุม การหมุนโดย <strong>ไฟจะไม่สว่าง</strong></div>
-          <div className="candidate-row">
-            {players.map((p) => (
-              <button
-                key={`off-${p.key}`}
-                className="candidate btn"
-                disabled={loading}
-                onClick={() => onRotateNoLight(p.key)}
-                title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟดับ`}
-              >
-                <div className="cand-ring">
-                  <div className="avatar"><User size={24} /></div>
-                  <div className="cand-name">{p.label}</div>
-                  <span className="status-pill">หมุน + ไฟดับ</span>
-                </div>
+          {/* ล่างขวา: ไฟจะไม่สว่าง */}
+          <section className="ctrl-card alt">
+            <div className="ctrl-head">ควบคุม การหมุนโดย <strong>ไฟจะไม่สว่าง</strong></div>
+            <div className="mini-row">
+              {players.map((p) => (
+                <button
+                  key={`off-${p.key}`}
+                  className={`mini ${pickedOff.has(p.key) ? "is-off" : ""}`}
+                  disabled={loading}
+                  onClick={() => onRotateNoLight(p.key)}
+                  title={`เลือก ${p.label} → เซอร์โวหมุน + ไฟดับ`}
+                >
+                  <div className="mini-avatar"><User size={22} /></div>
+                  <div className="mini-name">{p.label}</div>
+                </button>
+              ))}
+            </div>
+            <div className="ctrl-foot">
+              <span />
+              <button className="reset" onClick={onResetOffUI} title="Reset">
+                Reset <RotateCcw size={16} />
               </button>
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
+
+        <div style={{ maxWidth: 1100, margin: "8px 18px 24px", color: "#64748b", fontSize: 13 }}>
+          ESP32 จะรับคิวภายใน ~0.2s
+        </div>
       </div>
     </div>
   );

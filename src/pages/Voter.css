@@ -1,176 +1,139 @@
-/* โครงหน้า */
-.vote-page {
-  padding: 12px 24px 40px;
-  color: #111;
-  background: #fff;
-}
+/* ───────── โครงหน้า ───────── */
+.vote-page { padding: 12px 24px 40px; color:#111; background:#fff; }
 .vote-topbar-spacer { height: 6px; }
 
 /* หัวข้อ + breadcrumb + เวลา */
 .vote-header-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:12px; margin-bottom:12px;
 }
-.vote-head-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.vote-title {
-  font-size: 22px;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.2;
-}
-.vote-breadcrumb {
-  font-size: 14px;
-  color: #4b5563;
+.vote-head-left { display:flex; flex-direction:column; gap:6px; }
+.vote-title { font-size:22px; font-weight:800; margin:0; line-height:1.2; }
+.vote-breadcrumb { font-size:14px; color:#4b5563; }
+.vote-datetime{
+  background:#eef2ff; color:#1e3a8a; border:1px solid #c7d2fe;
+  border-radius:10px; padding:8px 12px; font-size:13px; line-height:1; white-space:nowrap;
 }
 
-/* ชิปวัน–เวลา ด้านขวา */
-.vote-datetime {
-  background: #eef2ff;
-  color: #1e3a8a;
-  border: 1px solid #c7d2fe;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1;
-  white-space: nowrap;
+/* ───────── การ์ดผลโหวต (บน) ───────── */
+.vote-card{
+  border:1px solid #cfd6df; border-radius:10px; background:#fff;
+  padding:18px 20px 24px;
+  max-width:1060px; width:100%;           /* กว้างเต็มเท่ากัน */
+  margin:0 auto 18px; box-sizing:border-box;  /* กึ่งกลาง */
 }
+.section-title{ font-size:14px; color:#475569; margin-bottom:18px; }
 
-/* การ์ดแสดงผล */
-.vote-card {
-  border: 1px solid #cfd6df;
-  border-radius: 10px;
-  padding: 18px 20px 24px;
-  background: #fff;
-  max-width: 1060px;
-}
-.section-title {
-  font-size: 14px;
-  color: #475569;
-  margin-bottom: 18px;
-}
+/* กรอบน้ำเงินครอบแถวบน */
+.blue-box{ border:3px solid #60a5fa; border-radius:10px; padding:16px 10px; }
 
-/* === แถวผู้เข้าแข่งขัน: ใช้ GRID 4 คอลัมน์ + จัดกลางเสมอ === */
-/* === แถวผู้เข้าแข่งขัน: ใช้ GRID 4 คอลัมน์ + จัดกลางเสมอ === */
-.candidate-row {
-  display: grid;
-  grid-template-columns: repeat(4, 140px); /* คอลัมน์ละเท่ากับวงกลม */
-  justify-content: center;                 /* จัดทั้งกริดให้อยู่กึ่งกลางการ์ด */
-  column-gap: 48px;                        /* ระยะห่างแนวนอน */
-  row-gap: 28px;                           /* รองรับ wrap บนจอเล็ก */
-  padding: 6px 0 24px;
+/* แถวผู้เข้าแข่งขัน */
+.candidate-row{
+  display:grid; grid-template-columns:repeat(4, 140px);
+  justify-content:center; column-gap:48px; row-gap:28px; padding:6px 0 24px;
 }
-
-/* ปุ่มภายนอกโปร่งใส ไม่ให้เกิดกรอบเหลี่ยม */
-.candidate {
-  width: 140px;              /* ให้เท่าคอลัมน์ของ grid */
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0;
-  cursor: pointer;
-  display: grid;
-  justify-items: center;
-  transition: transform 120ms ease;
+.candidate{
+  width:140px; background:transparent !important; border:0 !important; padding:0 !important;
+  margin:0; cursor:pointer; display:grid; justify-items:center; transition:transform 120ms ease;
 }
-.candidate:hover { transform: translateY(-1px); }
+.candidate:hover{ transform: translateY(-1px); }
 
 /* วงกลมหลัก */
-.cand-ring {
-  width: 160px;
-  height: 160px;
-  border-radius: 999px;
-  display: grid;
-  grid-template-rows: auto auto auto;  /* icon / name / pill */
-  align-content: center;
-  justify-items: center;
-  gap: 8px;
-  padding: 14px;
-
+.cand-ring{
+  width:160px; height:160px; border-radius:999px; display:grid;
+  grid-template-rows:auto auto auto; align-content:center; justify-items:center; gap:8px; padding:14px;
   background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f7f9fb 70%);
-  border: 1px solid #e5e7eb;
-  box-shadow:
-    inset 0 2px 8px rgba(255,255,255,0.95),
-    0 6px 20px rgba(2,6,23,0.06);
+  border:1px solid #e5e7eb;
+  box-shadow: inset 0 2px 8px rgba(255,255,255,0.95), 0 6px 20px rgba(2,6,23,0.06);
+}
+.avatar{
+  width:62px; height:62px; border-radius:999px; background:#eef2f7; border:1px solid #e2e8f0;
+  display:grid; place-items:center;
+  box-shadow: 0 6px 10px rgba(2,6,23,0.06), inset 0 2px 6px rgba(255,255,255,0.85);
+}
+.cand-name{ font-weight:700; font-size:15px; color:#111827; }
+.status-pill{
+  font-size:11.5px; color:#64748b; background:#eef2f7; border:1px solid #e5e7eb;
+  padding:5px 10px; border-radius:999px; line-height:1;
 }
 
-/* วงกลมเล็กของไอคอน */
-.avatar {
-  width: 62px;
-  height: 62px;
-  border-radius: 999px;
-  background: #eef2f7;
-  border: 1px solid #e2e8f0;
-  display: grid;
-  place-items: center;
-  box-shadow:
-    0 6px 10px rgba(2,6,23,0.06),
-    inset 0 2px 6px rgba(255,255,255,0.85);
+/* active บนแถวผลโหวต */
+.candidate.active .cand-ring{
+  border-color:#93c5fd;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.25), 0 8px 24px rgba(59,130,246,0.22), inset 0 0 0 3px rgba(59,130,246,0.15);
 }
+.candidate.active .status-pill{ background:#dbeafe; color:#1e3a8a; border-color:#bfdbfe; }
 
-/* ข้อความภายในวงกลม */
-.cand-name {
-  font-weight: 700;
-  font-size: 15px;
-  color: #111827;
+/* ส่วนล่างของการ์ดบน */
+.vote-footer{ display:flex; align-items:center; justify-content:space-between; margin-top:22px; }
+.link-back,.btn-refresh{
+  border:none; background:transparent; color:#222; font-size:13.5px; cursor:pointer;
+  padding:6px 10px; border-radius:8px;
 }
-.status-pill {
-  font-size: 11.5px;
-  color: #64748b;
-  background: #eef2f7;
-  border: 1px solid #e5e7eb;
-  padding: 5px 10px;
-  border-radius: 999px;
-  line-height: 1;
-}
+.link-back:hover,.btn-refresh:hover{ background:#f3f4f6; }
 
-/* สถานะ active — วงแหวนฟ้าบาง ๆ รอบวงกลม */
-.candidate.active .cand-ring {
-  border-color: #93c5fd;
-  box-shadow:
-    0 0 0 2px rgba(59,130,246,0.25),
-    0 8px 24px rgba(59,130,246,0.22),
-    inset 0 0 0 3px rgba(59,130,246,0.15);
+/* ───────── การ์ดควบคุม (ล่าง) ───────── */
+/* หุ้มสองการ์ดล่างให้กว้างเท่าการ์ดบนเสมอ */
+.ctrl-wrap{
+  max-width:1060px; width:100%;
+  margin:0 auto 18px; box-sizing:border-box;
 }
-.candidate.active .status-pill {
-  background: #dbeafe;
-  color: #1e3a8a;
-  border-color: #bfdbfe;
+.ctrl-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:18px;
 }
+.ctrl-card{
+  border:1px solid #d9e1ea; border-radius:12px; background:#fff;
+  box-shadow:0 6px 18px rgba(19,41,78,0.06);
+  padding:16px 18px 12px;
+}
+.ctrl-card.alt{ background:#eef5ff; }
+.ctrl-head{ font-size:14px; color:#475569; margin-bottom:12px; }
 
-/* ส่วนล่าง */
-.vote-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 22px;
+/* ปุ่มวงกลมเล็กของการ์ดล่าง */
+.mini-row{
+  display:grid; grid-template-columns:repeat(4, 120px); justify-content:center;
+  column-gap:36px; row-gap:16px; padding:8px 0 8px;
 }
-.link-back, .btn-refresh {
-  border: none;
-  background: transparent;
-  color: #222;
-  font-size: 13.5px;
-  cursor: pointer;
-  padding: 6px 10px;                                                        
-  border-radius: 8px;
+.mini{
+  width:120px; border:0; background:transparent; cursor:pointer;
+  display:grid; justify-items:center; gap:8px;
 }
-.link-back:hover, .btn-refresh:hover { background: #f3f4f6; }
+.mini-avatar{
+  width:64px; height:64px; border-radius:999px; display:grid; place-items:center;
+  background:#f3f6fb; border:1px solid #dbe2ea;
+  box-shadow: inset 0 2px 6px rgba(255,255,255,0.9), 0 6px 14px rgba(33,54,88,0.06);
+}
+.mini-name{ font-size:14px; color:#111827; }
 
-/* จอเล็ก: ปรับ grid */
-@media (max-width: 900px) {
-  .candidate-row { grid-template-columns: repeat(3, 140px); }
+/* ไฮไลต์ — เลือกได้หลายปุ่ม */
+.mini.is-on .mini-avatar{
+  background:#2563eb; color:#fff; border-color:#1d4ed8;
+  box-shadow: 0 10px 24px rgba(37,99,235,0.35), inset 0 0 0 2px rgba(255,255,255,0.25);
 }
-@media (max-width: 640px) {
-  .candidate-row {
-    grid-template-columns: repeat(2, 140px);
-    column-gap: 28px;
-  }
-  .vote-header-row { flex-direction: column; align-items: flex-start; }
-  .vote-datetime { margin-top: 4px; }
+.mini.is-on .mini-name{ color:#1d4ed8; font-weight:700; }
+
+.mini.is-off .mini-avatar{
+  background:#0b1220; color:#fff; border-color:#0b1220;
+  box-shadow: 0 10px 24px rgba(2,6,23,0.35), inset 0 0 0 2px rgba(255,255,255,0.15);
+}
+.mini.is-off .mini-name{ color:#0b1220; font-weight:700; }
+
+/* ท้ายการ์ดล่าง */
+.ctrl-foot{ margin-top:8px; display:flex; align-items:center; justify-content:space-between; }
+.reset{
+  border:0; background:transparent; color:#0f172a; cursor:pointer;
+  display:inline-flex; gap:6px; align-items:center; padding:6px 8px; border-radius:8px;
+}
+.reset:hover{ background:#e7eefb; }
+
+/* ───────── Responsive ───────── */
+@media (max-width:900px){ .candidate-row{ grid-template-columns:repeat(3, 140px); } }
+@media (max-width:640px){
+  .candidate-row{ grid-template-columns:repeat(2, 140px); column-gap:28px; }
+  .vote-header-row{ flex-direction:column; align-items:flex-start; }
+  .vote-datetime{ margin-top:4px; }
+}
+@media (max-width:960px){
+  .ctrl-grid{ grid-template-columns:1fr; }
+  .mini-row{ grid-template-columns:repeat(4, 100px); }
 }
