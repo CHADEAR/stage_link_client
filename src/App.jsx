@@ -18,6 +18,7 @@ import {
   register as apiRegister,
   getAccessToken
 } from "./services/api";
+import Admin from "./pages/Admin";
 
 export default function App() {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/upload" element={<Upload />} />
           <Route path="/user" element={<User />} />
           <Route path="/programme/:id" element={<ProgrammeDetail />} />
+          <Route path="/admin" element={<Admin />} />
         </Route>
 
         {/* public routes */}
