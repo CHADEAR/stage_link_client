@@ -50,7 +50,7 @@ export default function Voter() {
   const [err, setErr] = useState("");
   const pollTimerRef = useRef(null);
 
-  // สำหรับไฮไลต์ปุ่มของการ์ดล่าง (เลือกได้หลายคน)
+  // ไฮไลต์ปุ่มในการ์ดล่าง (เลือกได้หลายคน)
   const [pickedOn, setPickedOn] = useState(() => new Set());   // ฝั่งไฟสว่าง
   const [pickedOff, setPickedOff] = useState(() => new Set()); // ฝั่งไฟดับ
 
@@ -119,7 +119,6 @@ export default function Voter() {
 
   // กดปุ่มในการ์ดล่างซ้าย: หมุน + ไฟสว่าง
   const onRotateWithLight = async (player) => {
-    // toggle ไฮไลต์แบบหลายตัวเลือก
     setPickedOn((prev) => {
       const next = new Set(prev);
       next.has(player) ? next.delete(player) : next.add(player);
@@ -138,11 +137,7 @@ export default function Voter() {
     await postJson(`${API_CTRL}/enqueue`, { player, light: false });
   };
 
-  // Reset UI เฉพาะการ์ดล่าง
-  const onResetOnUI = () => setPickedOn(new Set());
-  const onResetOffUI = () => setPickedOff(new Set());
-
-  // Refresh (รีเซ็ตฮาร์ดแวร์ + สแนปช็อตให้เป็น 0 ทั้งหมด)
+  // Refresh (รีเซ็ตฮาร์ดแวร์ + สแนปช็อตเป็นค่าเริ่มต้น)
   const onRefreshResetAll = async () => {
     await postJson(`${API_CTRL}/reset`, { all: true });
     setPickedOn(new Set());
@@ -175,7 +170,7 @@ export default function Voter() {
         {/* การ์ดบน: แสดงผลการเลือก + กรอบน้ำเงิน */}
         <section className="vote-card">
           <div className="section-title">
-            แสดงผลการเลือกของกรรมการ <strong>The Voice</strong>
+            แสดงผลการเลือกของกรรมการ 
           </div>
           {err && <div className="warn">{err}</div>}
 
@@ -201,7 +196,7 @@ export default function Voter() {
           <div className="vote-footer">
             <button className="link-back" onClick={() => navigate(-1)}>&lt; Back</button>
             <button className="btn-refresh" onClick={onRefreshResetAll} disabled={loading}>
-              <RotateCcw size={16} /> {loading ? "Loading..." : "Refresh"}
+              <RotateCcw size={16} /> {loading ? "Loading..." : "Reset"}
             </button>
           </div>
         </section>
@@ -225,12 +220,6 @@ export default function Voter() {
                 </button>
               ))}
             </div>
-            <div className="ctrl-foot">
-              <span />
-              <button className="reset" onClick={onResetOnUI} title="Reset">
-                Reset <RotateCcw size={16} />
-              </button>
-            </div>
           </section>
 
           {/* ล่างขวา: ไฟจะไม่สว่าง */}
@@ -249,12 +238,6 @@ export default function Voter() {
                   <div className="mini-name">{p.label}</div>
                 </button>
               ))}
-            </div>
-            <div className="ctrl-foot">
-              <span />
-              <button className="reset" onClick={onResetOffUI} title="Reset">
-                Reset <RotateCcw size={16} />
-              </button>
             </div>
           </section>
         </div>

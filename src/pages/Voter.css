@@ -82,7 +82,7 @@
   display:grid; grid-template-columns:1fr 1fr; gap:18px;
 }
 .ctrl-card{
-  border:1px solid #d9e1ea; border-radius:12px; background:#fff;
+  border:1px solid #d9e1ea; border-radius:12px; background:#eef5ff;
   box-shadow:0 6px 18px rgba(19,41,78,0.06);
   padding:16px 18px 12px;
 }
